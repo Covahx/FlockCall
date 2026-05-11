@@ -314,6 +314,34 @@
     touch-action: manipulation;
   }
 
+  /* In-app loudness (same as former output gain in settings) */
+  .gain-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(6px, 1.8vw, 10px);
+    padding: 2px clamp(10px, 3vw, 18px) 8px;
+    flex-shrink: 0;
+  }
+  .gain-row .gain-btn {
+    background: var(--surface);
+    color: var(--muted);
+    border: 1px solid #2A343C;
+    border-radius: 10px;
+    padding: 6px 4px;
+    font-size: clamp(11px, 3vmin, 14px);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    min-height: 40px;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .gain-row .gain-btn.active {
+    background: var(--surface-active);
+    color: var(--text);
+    border-color: var(--calm);
+  }
+
   /* Overlays */
   .overlay {
     position: fixed;
@@ -374,7 +402,7 @@
   /* Toast */
   #toast {
     position: fixed;
-    bottom: calc(60px + env(safe-area-inset-bottom));
+    bottom: calc(112px + env(safe-area-inset-bottom));
     left: 50%;
     transform: translateX(-50%);
     background: #243038;
@@ -441,6 +469,7 @@
     }
     .call .label { font-size: clamp(14px, 4vmin, 19px); }
     .call .sub { font-size: clamp(11px, 3vmin, 14px); }
+    .gain-row .gain-btn { min-height: 36px; padding: 4px 2px; font-size: clamp(10px, 2.8vmin, 13px); }
   }
 </style>
 </head>
@@ -506,6 +535,12 @@
     </div>
   </main>
 
+  <div id="gain-row" class="gain-row" role="toolbar" aria-label="Playback loudness in the app">
+    <button type="button" class="gain-btn" data-gain="0.4" aria-pressed="false" title="Quieter">low</button>
+    <button type="button" class="gain-btn" data-gain="0.6" aria-pressed="false" title="Default">mid</button>
+    <button type="button" class="gain-btn" data-gain="0.7" aria-pressed="false" title="Louder for outdoors">outdoor</button>
+  </div>
+
   <footer>
     <span id="counter">today: 0</span>
     <button id="settings-btn">settings</button>
@@ -539,18 +574,6 @@
 <div id="settings" class="overlay" hidden>
   <button class="close" data-close>close</button>
   <h2>Settings</h2>
-
-  <div class="setting-row">
-    <div>
-      <div>Output gain</div>
-      <div style="font-size:12px;color:var(--muted)">Quieter is better. Keep device volume modest.</div>
-    </div>
-    <div class="vals" id="gain-vals">
-      <button data-gain="0.4">low</button>
-      <button data-gain="0.6">mid</button>
-      <button data-gain="0.7">outdoor</button>
-    </div>
-  </div>
 
   <div class="setting-row">
     <div>
@@ -970,6 +993,19 @@ function playCategory(cat) {
   playPlaceholder(cat);
 }
 
+function applyGainToLivePlayback() {
+  const g = state.outputGain;
+  for (const ref of livePlayback) {
+    if (ref.type === "buffer" && ref.gain) {
+      try { ref.gain.gain.value = g; } catch (e) {}
+    } else if (ref.type === "htmlaudio" && ref.audio) {
+      try { ref.audio.volume = g; } catch (e) {}
+    } else if (ref.type === "placeholder" && ref.masterGain) {
+      try { ref.masterGain.gain.value = g * 0.25; } catch (e) {}
+    }
+  }
+}
+
 /* ---------- UI wiring ---------- */
 const els = {
   app: document.getElementById("app"),
@@ -1162,11 +1198,16 @@ els.ackBtn.addEventListener("click", () => {
   els.info.hidden = true;
   refreshStatus();
 });
+function refreshGainUI() {
+  document.querySelectorAll("#gain-row .gain-btn").forEach(b => {
+    const on = Number(b.dataset.gain) === state.outputGain;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+}
+
 /* Settings UI */
 function refreshSettingsUI() {
-  document.querySelectorAll("#gain-vals button").forEach(b => {
-    b.classList.toggle("active", Number(b.dataset.gain) === state.outputGain);
-  });
   document.querySelectorAll("#taper-vals button").forEach(b => {
     const isOn = b.dataset.taper === "on";
     b.classList.toggle("active", isOn === state.taperMode.enabled);
@@ -1178,10 +1219,12 @@ function updateForagingLoopToggle() {
   if (!cb) return;
   cb.checked = !!state.foragingLoop;
 }
-document.querySelectorAll("#gain-vals button").forEach(b => {
+document.querySelectorAll("#gain-row .gain-btn").forEach(b => {
   b.addEventListener("click", () => {
     state.outputGain = Number(b.dataset.gain);
-    saveState(); refreshSettingsUI();
+    saveState();
+    refreshGainUI();
+    applyGainToLivePlayback();
   });
 });
 document.querySelectorAll("#taper-vals button").forEach(b => {
@@ -1226,6 +1269,7 @@ if ("serviceWorker" in navigator && !IS_FILE_ORIGIN) {
   if (audioLoadStatus) audioLoadStatus.hidden = !usingPlaceholders;
   if (!state.firstLaunchAcknowledged) showInfo(true);
   updateForagingLoopToggle();
+  refreshGainUI();
   refreshStatus();
 })();
 </script>

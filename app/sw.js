@@ -1,5 +1,5 @@
 /* FlockCall service worker. Caches the app shell for offline use. */
-const CACHE = "flockcall-v25";
+const CACHE = "flockcall-v26";
 const CORE = [
   "./",
   "./index.html",
