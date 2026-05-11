@@ -21,9 +21,9 @@
     --caution: #B58A4A;
     --ready: #5F8A6B;
     --denied: #8E5F5F;
-    /* Shorter pads; foraging repeat row — extra bottom padding on Warning/Calm keeps icons aligned */
-    --pad-min-h: clamp(112px, 25svmin, 198px);
-    --foraging-repeat-stack: 42px;
+    /* Foraging repeat strip height — extra bottom padding on Warning/Calm keeps icons aligned */
+    --pad-min-h: clamp(124px, 28svmin, 220px);
+    --foraging-repeat-stack: 44px;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html {
@@ -100,16 +100,17 @@
     flex: 1;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: 1fr auto;
+    grid-template-rows: 1fr;
+    align-items: center;
     gap: clamp(8px, 2.4vw, 14px);
-    padding: clamp(6px, 1.8vw, 14px) clamp(6px, 1.8vw, 14px) clamp(4px, 1.2vw, 10px);
+    padding: clamp(8px, 2.2vw, 16px) clamp(6px, 1.8vw, 14px);
     min-height: 0;
   }
-  /* Pads sit in the bottom row so they stay in easy thumb reach */
   main#grid > .call,
   main#grid > .foraging-stack {
-    grid-row: 2;
-    align-self: stretch;
+    align-self: center;
+    width: 100%;
+    height: auto;
     min-height: 0;
   }
 
@@ -118,12 +119,12 @@
     flex-direction: column;
     min-width: 0;
     min-height: 0;
-    height: 100%;
+    height: auto;
   }
   .foraging-card {
-    flex: 1;
+    flex: 0 1 auto;
     min-height: var(--pad-min-h);
-    height: 100%;
+    height: auto;
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -184,7 +185,7 @@
     border-radius: clamp(12px, 3.2vw, 18px);
     padding: clamp(10px, 3vmin, 18px) clamp(6px, 1.5vw, 10px);
     min-height: var(--pad-min-h);
-    height: 100%;
+    height: auto;
     min-width: 0;
     display: flex;
     flex-direction: column;
@@ -207,8 +208,8 @@
   }
 
   .call .icon {
-    width: clamp(76px, 24vmin, 112px);
-    height: clamp(76px, 24vmin, 112px);
+    width: clamp(80px, 26vmin, 118px);
+    height: clamp(80px, 26vmin, 118px);
     color: var(--text);
     opacity: 0.95;
     flex-shrink: 0;
@@ -338,6 +339,30 @@
     text-align: center;
   }
   #toast.show { opacity: 1; }
+
+  /* Narrow phones: larger tap targets (portrait-friendly) */
+  @media (max-width: 540px) {
+    :root {
+      --pad-min-h: clamp(150px, 42svmin, 280px);
+      --foraging-repeat-stack: 48px;
+    }
+    .call {
+      padding: clamp(14px, 3.8vmin, 22px) clamp(6px, 1.5vw, 10px);
+      gap: clamp(7px, 2vmin, 14px);
+    }
+    main#grid > .call.alert,
+    main#grid > .call[data-cat="heart"] {
+      padding-bottom: calc(clamp(14px, 3.8vmin, 22px) + var(--foraging-repeat-stack));
+    }
+    .call .icon {
+      width: clamp(92px, 31vmin, 132px);
+      height: clamp(92px, 31vmin, 132px);
+    }
+    .call .label { font-size: clamp(18px, 5.3vmin, 26px); }
+    .call .sub { font-size: clamp(13px, 3.7vmin, 17px); }
+    .foraging-loop-cb { width: 24px; height: 24px; }
+    .foraging-repeat-text { font-size: clamp(13px, 3.6vmin, 17px); }
+  }
 
   /* Short phones / landscape: keep controls usable without scrolling */
   @media (max-height: 520px) {
@@ -491,7 +516,7 @@
   <div id="audio-load-status" class="setting-row" hidden>
     <div>
       <div>Test tones only</div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.45">No clip files were loaded from <code style="font-size:11px;word-break:break-all">assets/audio/Exports/</code> (missing on the server, wrong path, or blocked request). The pads use soft beeps on every device until those files are deployed with the site. Locally, use an <code style="font-size:11px">http://</code> server and keep the exports next to the app.</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.45">No clip files were loaded from <code style="font-size:11px;word-break:break-all">assets/audio/Exports/</code> (missing on the server, wrong path, or decode failed). The pads use soft beeps until a supported clip loads. On iPhone, Web Audio often prefers <strong>AAC in .m4a</strong> over some <strong>.mp4</strong> muxes; re-export if you hear beeps despite files being present. Locally, use <code style="font-size:11px">http://</code> and keep exports next to the app.</div>
     </div>
   </div>
 
@@ -691,7 +716,8 @@ async function tryLoadOneBase(cat, base) {
       const ab = await res.arrayBuffer();
       if (ab.byteLength < 100) continue;
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const buf = await audioCtx.decodeAudioData(ab);
+      /* iOS/Safari Web Audio often rejects decode on the fetch buffer view; copy first. */
+      const buf = await audioCtx.decodeAudioData(ab.slice(0));
       audioBuffers[cat].push(buf);
       return true;
     } catch (e) { /* next ext */ }
