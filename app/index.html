@@ -147,9 +147,8 @@
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    justify-content: flex-start;
     align-items: center;
-    gap: var(--pad-stack-gap);
+    gap: 0;
     padding: var(--pad-inset-y) var(--pad-inset-x) 6px;
     overflow: hidden;
   }
@@ -211,11 +210,27 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    gap: var(--pad-stack-gap);
+    gap: 0;
     cursor: pointer;
     transition: background 120ms, transform 120ms, opacity 120ms;
     touch-action: manipulation;
+  }
+  /* Vertically center icon + label + sub as a block (avoids icons stuck to top) */
+  .call::before,
+  .call::after {
+    content: "";
+    display: block;
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    pointer-events: none;
+  }
+  .call > .icon,
+  .call > .foraging-icon-slot {
+    margin-bottom: var(--pad-stack-gap);
+  }
+  .call > .label {
+    margin-bottom: var(--pad-stack-gap);
   }
   .call:active { background: var(--surface-active); transform: scale(0.98); }
   .call.alert { border-color: var(--caution); }
@@ -387,11 +402,9 @@
     }
     .call {
       padding: var(--pad-inset-y) var(--pad-inset-x);
-      gap: var(--pad-stack-gap);
     }
     .foraging-main.call {
       padding: var(--pad-inset-y) var(--pad-inset-x) 6px;
-      gap: var(--pad-stack-gap);
     }
     main#grid > .call.alert,
     main#grid > .call[data-cat="heart"] {
@@ -418,11 +431,9 @@
     .call {
       min-height: 0;
       padding: var(--pad-inset-y) var(--pad-inset-x);
-      gap: var(--pad-stack-gap);
     }
     .foraging-main.call {
       padding: var(--pad-inset-y) var(--pad-inset-x) 4px;
-      gap: var(--pad-stack-gap);
     }
     main#grid > .call.alert,
     main#grid > .call[data-cat="heart"] {
