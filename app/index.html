@@ -401,7 +401,7 @@
   <h3>What the three buttons mean</h3>
   <p><strong>Warning (left):</strong> sharp alert, very rare. Tap twice within a few seconds to confirm before it plays.</p>
   <p><strong>Calm (centre):</strong> reassurance when the duckling needs settling.</p>
-  <p><strong>Foraging (right):</strong> eating and following context — use sparingly near food or when moving the bird.</p>
+  <p><strong>Foraging (right):</strong> eating and following context — use sparingly near food or when moving the bird. Optional repeat loop is in Settings.</p>
 
   <h3>Built-in limits</h3>
   <p>The app enforces cooldowns between plays, a daily soft cap of 8 plays, a hard cap of 20, and a long-press requirement during quiet hours (22:00 to 06:00). These are not suggestions.</p>
@@ -434,6 +434,17 @@
     <div class="vals" id="taper-vals">
       <button data-taper="off">off</button>
       <button data-taper="on">on</button>
+    </div>
+  </div>
+
+  <div class="setting-row">
+    <div>
+      <div>Foraging repeat</div>
+      <div style="font-size:12px;color:var(--muted)">Loop the Foraging clip until you turn this off or tap another button.</div>
+    </div>
+    <div class="vals" id="foraging-loop-vals">
+      <button type="button" data-foraging-loop="off">off</button>
+      <button type="button" data-foraging-loop="on">on</button>
     </div>
   </div>
 
@@ -479,7 +490,7 @@ const RULES = {
 };
 
 /* ---------- State ---------- */
-const STATE_KEY = "flockcall.state.v2";
+const STATE_KEY = "flockcall.state.v3";
 
 function defaultState() {
   return {
@@ -491,6 +502,7 @@ function defaultState() {
     dailyPlayCount: 0,
     outputGain: 0.6,
     taperMode: { enabled: false, startDate: null },
+    foragingLoop: false,
   };
 }
 function loadState() {
@@ -504,6 +516,7 @@ function loadState() {
       ...s,
       lastPlayedAt: { ...d.lastPlayedAt, ...(s.lastPlayedAt || {}) },
       lastVariant: { ...d.lastVariant, ...(s.lastVariant || {}) },
+      foragingLoop: typeof s.foragingLoop === "boolean" ? s.foragingLoop : d.foragingLoop,
     };
   } catch (e) { return defaultState(); }
 }
@@ -592,14 +605,45 @@ const audioBuffers = { heart: [], fisharrows: [], alert: [] };
 let usingPlaceholders = false;
 let audioCtx = null;
 
-/* At most this many overlapping plays of the same category (same button). */
+/* Layering: up to 2 one-shots per button; foraging loop allows only one stream. */
 const MAX_LAYERS_SAME_CAT = 2;
-const activePlaybackByCat = Object.fromEntries(CATEGORIES.map(c => [c, 0]));
-function releasePlaybackSlot(cat) {
-  activePlaybackByCat[cat] = Math.max(0, activePlaybackByCat[cat] - 1);
+const livePlayback = [];
+
+function countPlaying(cat) {
+  return livePlayback.filter(r => r.cat === cat).length;
+}
+function removeLiveRef(ref) {
+  const i = livePlayback.indexOf(ref);
+  if (i !== -1) livePlayback.splice(i, 1);
+}
+function stopCategoryPlayback(cat) {
+  const refs = livePlayback.filter(r => r.cat === cat);
+  for (const ref of refs) {
+    if (ref.type === "buffer") {
+      try { ref.source.stop(0); } catch (e) { /* already ended */ }
+      try { ref.source.disconnect(); } catch (e) {}
+      try { ref.gain.disconnect(); } catch (e) {}
+    } else if (ref.type === "placeholder") {
+      if (ref.timerId) clearTimeout(ref.timerId);
+      for (const o of ref.oscs || []) {
+        try { o.stop(0); } catch (e) {}
+        try { o.disconnect(); } catch (e) {}
+      }
+      try { ref.masterGain.disconnect(); } catch (e) {}
+    }
+    removeLiveRef(ref);
+  }
+}
+/** Stop every category except `cat`, and restart foraging if looping the same pad. */
+function preparePlaybackForNewPress(cat) {
+  for (const c of CATEGORIES) {
+    if (c !== cat) stopCategoryPlayback(c);
+  }
+  if (cat === "fisharrows" && state.foragingLoop) stopCategoryPlayback("fisharrows");
 }
 function canStartLayeredSound(cat) {
-  return activePlaybackByCat[cat] < MAX_LAYERS_SAME_CAT;
+  const cap = (cat === "fisharrows" && state.foragingLoop) ? 1 : MAX_LAYERS_SAME_CAT;
+  return countPlaying(cat) < cap;
 }
 
 async function tryLoadOneBase(cat, base) {
@@ -647,18 +691,28 @@ function playRealClip(cat) {
   const pool = audioBuffers[cat];
   if (!pool.length) return void playPlaceholder(cat);
   if (!canStartLayeredSound(cat)) return;
-  activePlaybackByCat[cat]++;
   const idx = pickVariantIndex(cat, pool.length);
+  const buf = pool[idx];
   const src = audioCtx.createBufferSource();
-  src.buffer = pool[idx];
+  src.buffer = buf;
+  const loop = cat === "fisharrows" && state.foragingLoop;
+  if (loop) {
+    src.loop = true;
+    src.loopStart = 0;
+    src.loopEnd = buf.duration;
+  }
   const gain = audioCtx.createGain();
   gain.gain.value = state.outputGain;
-  src.onended = () => releasePlaybackSlot(cat);
+  const ref = { cat, type: "buffer", source: src, gain };
+  src.onended = () => {
+    if (livePlayback.includes(ref)) removeLiveRef(ref);
+  };
   src.connect(gain).connect(audioCtx.destination);
+  livePlayback.push(ref);
   try {
     src.start(0);
   } catch (e) {
-    releasePlaybackSlot(cat);
+    removeLiveRef(ref);
   }
 }
 
@@ -670,15 +724,14 @@ const PLACEHOLDER_SPECS = {
 };
 function playPlaceholder(cat) {
   if (!canStartLayeredSound(cat)) return;
-  activePlaybackByCat[cat]++;
   ensureCtx();
   const spec = PLACEHOLDER_SPECS[cat];
   const releaseAfterMs = 50 + (spec.env === "pulse" ? 200 + spec.dur * 1000 : spec.dur * 1000);
-  setTimeout(() => releasePlaybackSlot(cat), releaseAfterMs);
   const now = audioCtx.currentTime;
   const masterGain = audioCtx.createGain();
   masterGain.gain.value = state.outputGain * 0.25; // extra-quiet for placeholders
   masterGain.connect(audioCtx.destination);
+  const ref = { cat, type: "placeholder", oscs: [], masterGain, timerId: null };
 
   const playOnce = (startOffset) => {
     spec.freqs.forEach(freq => {
@@ -692,11 +745,18 @@ function playPlaceholder(cat) {
       osc.connect(g).connect(masterGain);
       osc.start(now + startOffset);
       osc.stop(now + startOffset + spec.dur + 0.05);
+      ref.oscs.push(osc);
     });
   };
 
   if (spec.env === "pulse") { playOnce(0); playOnce(0.2); }
   else { playOnce(0); }
+
+  ref.timerId = setTimeout(() => {
+    ref.timerId = null;
+    removeLiveRef(ref);
+  }, releaseAfterMs);
+  livePlayback.push(ref);
 }
 
 function playCategory(cat) {
@@ -778,6 +838,7 @@ function tryPlay(cat, opts) {
     setTimeout(() => refreshStatus(), 1800);
     return;
   }
+  preparePlaybackForNewPress(cat);
   if (!canStartLayeredSound(cat)) {
     setStatus("Too many playing", "denied");
     toast("Let a call finish — only two at once per button.");
@@ -901,6 +962,10 @@ function refreshSettingsUI() {
     const isOn = b.dataset.taper === "on";
     b.classList.toggle("active", isOn === state.taperMode.enabled);
   });
+  document.querySelectorAll("#foraging-loop-vals button").forEach(b => {
+    const isOn = b.dataset.foragingLoop === "on";
+    b.classList.toggle("active", isOn === state.foragingLoop);
+  });
 }
 document.querySelectorAll("#gain-vals button").forEach(b => {
   b.addEventListener("click", () => {
@@ -915,6 +980,17 @@ document.querySelectorAll("#taper-vals button").forEach(b => {
     state.taperMode.startDate = on ? new Date().toISOString() : null;
     saveState(); refreshSettingsUI();
     if (on) toast("taper mode on; cooldowns will grow daily");
+  });
+});
+document.querySelectorAll("#foraging-loop-vals button").forEach(b => {
+  b.addEventListener("click", () => {
+    const on = b.dataset.foragingLoop === "on";
+    const was = state.foragingLoop;
+    state.foragingLoop = on;
+    if (was && !on) stopCategoryPlayback("fisharrows");
+    saveState();
+    refreshSettingsUI();
+    if (on) toast("Foraging will loop until you tap another button or turn this off.");
   });
 });
 document.getElementById("reset-daily").addEventListener("click", () => {
