@@ -1,0 +1,6 @@
+dist/
+tools/FlockCallTestServer/bin/
+tools/FlockCallTestServer/obj/
+
+# Raw editing workspace — not needed to run the site; may contain large or rights-sensitive sources
+app/assets/audio/Work/
