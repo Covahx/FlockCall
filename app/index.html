@@ -544,7 +544,7 @@
   <div id="audio-load-status" class="setting-row" hidden>
     <div>
       <div>Test tones only</div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.45">No clip files were loaded from <code style="font-size:11px;word-break:break-all">assets/audio/Exports/</code> (missing on the server, wrong path, or decode failed). The pads use soft beeps until a supported clip loads. On iPhone, Web Audio often prefers <strong>AAC in .m4a</strong> over some <strong>.mp4</strong> muxes; re-export if you hear beeps despite files being present. Locally, use <code style="font-size:11px">http://</code> and keep exports next to the app.</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.45">No clip files were loaded from <code style="font-size:11px;word-break:break-all">assets/audio/Exports/</code> (missing on the server, wrong path, or blocked). The pads use soft beeps until a clip loads. This app tries <strong>Web Audio</strong> first, then a plain <strong>HTML audio</strong> fallback if decoding fails. Some privacy or ad-blocking browsers still block both—use normal Chrome or Safari if you only hear beeps. On iPhone, <strong>.m4a</strong> often decodes more reliably than some <strong>.mp4</strong> files. Locally, use <code style="font-size:11px">http://</code> and keep exports next to the app.</div>
     </div>
   </div>
 
@@ -692,6 +692,8 @@ const AUDIO_FILES = {
 const AUDIO_EXTS = [".m4a", ".mp3", ".mp4", ".ogg", ".wav"];
 
 const audioBuffers = { heart: [], fisharrows: [], alert: [] };
+/** When Web Audio decode fails: resolved URL for HTML5 Audio fallback (some privacy browsers). */
+const htmlAudioUrl = { heart: null, fisharrows: null, alert: null };
 let usingPlaceholders = false;
 let audioCtx = null;
 
@@ -720,6 +722,12 @@ function stopCategoryPlayback(cat) {
         try { o.disconnect(); } catch (e) {}
       }
       try { ref.masterGain.disconnect(); } catch (e) {}
+    } else if (ref.type === "htmlaudio") {
+      try { ref.audio.pause(); } catch (e) {}
+      try {
+        ref.audio.removeAttribute("src");
+        ref.audio.load();
+      } catch (e) {}
     }
     removeLiveRef(ref);
   }
@@ -753,16 +761,61 @@ async function tryLoadOneBase(cat, base) {
   return false;
 }
 
-async function tryLoadAudioFiles() {
-  if (IS_FILE_ORIGIN) return;
-  let anyLoaded = false;
-  for (const cat of CATEGORIES) {
-    for (const base of AUDIO_FILES[cat]) {
-      const ok = await tryLoadOneBase(cat, base);
-      if (ok) anyLoaded = true;
+function probeHtmlAudioUrl(url) {
+  return new Promise((resolve) => {
+    const a = new Audio();
+    let settled = false;
+    const finish = (ok) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(tid);
+      a.removeEventListener("canplaythrough", onOk);
+      a.removeEventListener("loadeddata", onOk);
+      a.removeEventListener("error", onBad);
+      try {
+        a.pause();
+        a.removeAttribute("src");
+        a.load();
+      } catch (e) {}
+      resolve(ok ? url : null);
+    };
+    const onOk = () => finish(true);
+    const onBad = () => finish(false);
+    const tid = setTimeout(() => finish(false), 12000);
+    a.addEventListener("canplaythrough", onOk, { once: true });
+    a.addEventListener("loadeddata", onOk, { once: true });
+    a.addEventListener("error", onBad, { once: true });
+    a.preload = "auto";
+    a.src = url;
+    try { a.load(); } catch (e) { finish(false); }
+  });
+}
+
+async function tryProbeHtmlAudioForCat(cat) {
+  for (const base of AUDIO_FILES[cat]) {
+    for (const ext of AUDIO_EXTS) {
+      const url = base + ext;
+      const okUrl = await probeHtmlAudioUrl(url);
+      if (okUrl) {
+        htmlAudioUrl[cat] = okUrl;
+        return true;
+      }
     }
   }
-  if (!anyLoaded) usingPlaceholders = true;
+  return false;
+}
+
+async function tryLoadAudioFiles() {
+  if (IS_FILE_ORIGIN) return;
+  for (const cat of CATEGORIES) {
+    for (const base of AUDIO_FILES[cat]) {
+      await tryLoadOneBase(cat, base);
+    }
+  }
+  for (const cat of CATEGORIES) {
+    if (audioBuffers[cat].length === 0) await tryProbeHtmlAudioForCat(cat);
+  }
+  usingPlaceholders = CATEGORIES.every(c => !audioBuffers[c].length && !htmlAudioUrl[c]);
 }
 
 function ensureCtx() {
@@ -850,10 +903,39 @@ function playPlaceholder(cat) {
   livePlayback.push(ref);
 }
 
+function playHtmlAudioClip(cat) {
+  const url = htmlAudioUrl[cat];
+  if (!url || !canStartLayeredSound(cat)) return;
+  const a = new Audio(url);
+  a.volume = state.outputGain;
+  const loop = cat === "fisharrows" && state.foragingLoop;
+  a.loop = !!loop;
+  const ref = { cat, type: "htmlaudio", audio: a };
+  a.addEventListener("ended", () => {
+    if (a.loop) return;
+    if (livePlayback.includes(ref)) removeLiveRef(ref);
+  });
+  a.onerror = () => {
+    if (livePlayback.includes(ref)) removeLiveRef(ref);
+  };
+  livePlayback.push(ref);
+  a.play().catch(() => {
+    removeLiveRef(ref);
+  });
+}
+
 function playCategory(cat) {
+  if (audioBuffers[cat].length) {
+    ensureCtx();
+    playRealClip(cat);
+    return;
+  }
+  if (htmlAudioUrl[cat]) {
+    playHtmlAudioClip(cat);
+    return;
+  }
   ensureCtx();
-  if (usingPlaceholders || audioBuffers[cat].length === 0) playPlaceholder(cat);
-  else playRealClip(cat);
+  playPlaceholder(cat);
 }
 
 /* ---------- UI wiring ---------- */
