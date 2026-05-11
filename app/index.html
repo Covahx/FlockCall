@@ -21,9 +21,11 @@
     --caution: #B58A4A;
     --ready: #5F8A6B;
     --denied: #8E5F5F;
-    /* Foraging repeat strip height — extra bottom padding on Warning/Calm keeps icons aligned */
+    /* Foraging repeat block height — extra bottom padding on Warning/Calm keeps icons aligned */
     --pad-min-h: clamp(124px, 28svmin, 220px);
-    --foraging-repeat-stack: 44px;
+    --foraging-repeat-stack: 56px;
+    /* One size for all pad icons; wide foraging SVG is scaled up slightly so it matches visually */
+    --icon-box: clamp(80px, 26vmin, 118px);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html {
@@ -149,17 +151,20 @@
   }
   .foraging-repeat-row {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 5px;
     flex: 0 0 auto;
     flex-shrink: 0;
-    padding: 2px 8px max(8px, env(safe-area-inset-bottom, 0px));
+    width: 100%;
+    padding: 4px 8px max(8px, env(safe-area-inset-bottom, 0px));
     margin: 0;
     cursor: pointer;
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
+    text-align: center;
   }
   .foraging-loop-cb {
     width: 22px;
@@ -169,10 +174,12 @@
     cursor: pointer;
   }
   .foraging-repeat-text {
+    display: block;
     font-size: clamp(12px, 3.4vmin, 16px);
     font-weight: 600;
     color: var(--muted);
     letter-spacing: 0.03em;
+    line-height: 1.2;
   }
   .foraging-loop-cb:checked + .foraging-repeat-text {
     color: var(--text);
@@ -208,11 +215,16 @@
   }
 
   .call .icon {
-    width: clamp(80px, 26vmin, 118px);
-    height: clamp(80px, 26vmin, 118px);
+    width: var(--icon-box);
+    height: var(--icon-box);
     color: var(--text);
     opacity: 0.95;
     flex-shrink: 0;
+  }
+  /* Wide viewBox (108×52) letterboxes in a square; slight scale matches heart/warning visually */
+  .foraging-main.call .icon {
+    transform: scale(1.12);
+    transform-origin: center center;
   }
   .call .label {
     font-size: clamp(17px, 5vmin, 24px);
@@ -344,7 +356,8 @@
   @media (max-width: 540px) {
     :root {
       --pad-min-h: clamp(150px, 42svmin, 280px);
-      --foraging-repeat-stack: 48px;
+      --foraging-repeat-stack: 64px;
+      --icon-box: clamp(92px, 31vmin, 132px);
     }
     .call {
       padding: clamp(14px, 3.8vmin, 22px) clamp(6px, 1.5vw, 10px);
@@ -354,10 +367,6 @@
     main#grid > .call[data-cat="heart"] {
       padding-bottom: calc(clamp(14px, 3.8vmin, 22px) + var(--foraging-repeat-stack));
     }
-    .call .icon {
-      width: clamp(92px, 31vmin, 132px);
-      height: clamp(92px, 31vmin, 132px);
-    }
     .call .label { font-size: clamp(18px, 5.3vmin, 26px); }
     .call .sub { font-size: clamp(13px, 3.7vmin, 17px); }
     .foraging-loop-cb { width: 24px; height: 24px; }
@@ -366,7 +375,11 @@
 
   /* Short phones / landscape: keep controls usable without scrolling */
   @media (max-height: 520px) {
-    :root { --pad-min-h: clamp(96px, 22svmin, 168px); --foraging-repeat-stack: 34px; }
+    :root {
+      --pad-min-h: clamp(96px, 22svmin, 168px);
+      --foraging-repeat-stack: 42px;
+      --icon-box: clamp(56px, 18vmin, 84px);
+    }
     .foraging-repeat-row { padding: 0 6px 6px; }
     .foraging-loop-cb { width: 20px; height: 20px; }
     .call {
@@ -379,10 +392,7 @@
     main#grid > .call[data-cat="heart"] {
       padding-bottom: calc(clamp(6px, 1.8vmin, 12px) + var(--foraging-repeat-stack));
     }
-    .call .icon {
-      width: clamp(56px, 18vmin, 84px);
-      height: clamp(56px, 18vmin, 84px);
-    }
+    .foraging-main.call .icon { transform: scale(1.08); }
     .call .label { font-size: clamp(14px, 4vmin, 19px); }
     .call .sub { font-size: clamp(11px, 3vmin, 14px); }
   }
