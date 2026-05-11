@@ -15,9 +15,23 @@ Record one entry per clip bundled in `assets/audio/`. Required fields: filename,
 
 ## Entries
 
-- file: `assets/audio/Exports/Follow_Me.mp4`
-  source: *(add: Xeno-canto / Macaulay URL, or note if captive / own recording)*
+- file: `assets/audio/Exports/Heart_Calm.mp4`
+  source: *(add)*
   recordist: *(add)*
-  license: *(add — must allow redistribution if this file stays in the public repo)*
+  license: *(add)*
   downloaded: 2026-05-11
-  notes: Gather / follow-me slot; used when this file is present. Fill in provenance before treating the GitHub-hosted build as production-ready.
+  notes: Heart button — calm / reassurance clip.
+
+- file: `assets/audio/Exports/Fish&Arrows_Follow&Feeding.mp4`
+  source: *(add)*
+  recordist: *(add)*
+  license: *(add)*
+  downloaded: 2026-05-11
+  notes: Fish-and-arrows button — follow / feeding context.
+
+- file: `assets/audio/Exports/Exclamation_Warning.mp4`
+  source: *(add)*
+  recordist: *(add)*
+  license: *(add)*
+  downloaded: 2026-05-11
+  notes: Exclamation button — alert clip; double-tap to play in the app.

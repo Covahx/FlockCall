@@ -140,17 +140,12 @@
     flex: 1;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
     gap: 12px;
-    padding: 8px 12px;
+    padding: 12px;
     align-content: stretch;
+    min-height: 0;
   }
-  /* Cross layout. Change grid-column / grid-row below to rearrange. */
-  .call[data-cat="feeding"]  { grid-column: 2; grid-row: 1; }
-  .call[data-cat="gather"]   { grid-column: 1; grid-row: 2; }
-  .call[data-cat="contact"]  { grid-column: 2; grid-row: 2; }
-  .call[data-cat="location"] { grid-column: 3; grid-row: 2; }
-  .call[data-cat="warning"]  { grid-column: 2; grid-row: 3; }
 
   .call {
     background: var(--surface);
@@ -158,7 +153,9 @@
     border: 1px solid #2A343C;
     border-radius: 14px;
     padding: 14px;
-    min-height: 96px;
+    min-height: 120px;
+    height: 100%;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -169,11 +166,10 @@
     touch-action: manipulation;
   }
   .call:active { background: var(--surface-active); transform: scale(0.98); }
-  .call.warning { border-color: var(--caution); }
-  .call.warning .icon { color: var(--caution); }
-  /* Emphasise the centre (most-used) button slightly. */
-  .call[data-cat="contact"] { border-color: var(--calm); }
-  .call[data-cat="contact"] .icon { color: var(--text); }
+  .call.alert { border-color: var(--caution); }
+  .call.alert .icon { color: var(--caution); }
+  .call[data-cat="heart"] { border-color: var(--calm); }
+  .call[data-cat="heart"] .icon { color: var(--text); }
 
   .call .icon {
     width: 56px;
@@ -316,47 +312,31 @@
   </div>
 
   <main id="grid">
-    <button class="call" data-cat="feeding" aria-label="Feeding call">
+    <button class="call" data-cat="heart" aria-label="Calm call (heart)">
       <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M6 24 C 10 14, 22 12, 30 24 C 22 36, 10 34, 6 24 Z"/>
-        <path d="M30 24 L 42 16 L 38 24 L 42 32 Z"/>
-        <circle cx="14" cy="22" r="1.6" fill="currentColor"/>
+        <path d="M24 40 C10 30 6 20 12 14 C16 9 22 11 24 17 C26 11 32 9 36 14 C42 20 38 30 24 40 Z"/>
       </svg>
-      <span class="sub" data-sub="feeding"></span>
+      <span class="sub" data-sub="heart"></span>
     </button>
 
-    <button class="call" data-cat="gather" aria-label="Gather follow call">
+    <button class="call" data-cat="fisharrows" aria-label="Follow and feeding call (fish and arrows)">
       <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M8 14 L 18 24 L 8 34"/>
-        <path d="M20 14 L 30 24 L 20 34"/>
-        <path d="M32 14 L 42 24 L 32 34"/>
+        <path d="M4 24 C 8 16, 14 14, 22 24 C 14 34, 8 32, 4 24 Z"/>
+        <path d="M22 24 L 32 18 L 28 24 L 32 30 Z"/>
+        <circle cx="10" cy="22" r="1.5" fill="currentColor"/>
+        <path d="M34 16 L 44 24 L 34 32"/>
+        <path d="M34 24 L 42 24"/>
       </svg>
-      <span class="sub" data-sub="gather"></span>
+      <span class="sub" data-sub="fisharrows"></span>
     </button>
 
-    <button class="call" data-cat="contact" aria-label="Contact reassurance call">
+    <button class="call alert" data-cat="alert" aria-label="Alert call (exclamation); double tap to play">
       <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M24 41 C 9 31, 4 22, 8 14 C 12 6, 21 7, 24 16 C 27 7, 36 6, 40 14 C 44 22, 39 31, 24 41 Z"/>
+        <circle cx="24" cy="24" r="16"/>
+        <line x1="24" y1="14" x2="24" y2="26"/>
+        <circle cx="24" cy="32" r="2" fill="currentColor"/>
       </svg>
-      <span class="sub" data-sub="contact"></span>
-    </button>
-
-    <button class="call" data-cat="location" aria-label="Location flock call">
-      <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="24" cy="24" r="3.5" fill="currentColor"/>
-        <circle cx="24" cy="24" r="10"/>
-        <circle cx="24" cy="24" r="17" opacity="0.55"/>
-      </svg>
-      <span class="sub" data-sub="location"></span>
-    </button>
-
-    <button class="call warning" data-cat="warning" aria-label="Warning alert">
-      <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M24 6 L 44 40 L 4 40 Z"/>
-        <line x1="24" y1="19" x2="24" y2="29"/>
-        <circle cx="24" cy="35" r="1.8" fill="currentColor"/>
-      </svg>
-      <span class="sub" data-sub="warning"></span>
+      <span class="sub" data-sub="alert"></span>
     </button>
   </main>
 
@@ -378,12 +358,10 @@
   <p>Keep the speaker at arm's length from the bird. Never point it directly at the duckling from close range. If the bird startles or freezes, stop and give it quiet space.</p>
   <p>When the duckling stabilizes, turn on Taper Mode in settings. The app will become harder to use each day, by design.</p>
 
-  <h3>What the buttons mean</h3>
-  <p><strong>Contact:</strong> short reassurance call when the duckling is alone or panicking.</p>
-  <p><strong>Gather:</strong> follow call, useful during transfers.</p>
-  <p><strong>Feeding:</strong> calm social murmur, only near feeding time.</p>
-  <p><strong>Warning:</strong> sharp alert, very rare, requires a confirmation tap.</p>
-  <p><strong>Location:</strong> medium-distance call, used outdoors near water.</p>
+  <h3>What the three buttons mean</h3>
+  <p><strong>Heart:</strong> calm / reassurance call when the duckling needs settling.</p>
+  <p><strong>Fish and arrows:</strong> follow and feeding context — use sparingly during moves or near meal time.</p>
+  <p><strong>Exclamation:</strong> sharp alert, very rare. Tap twice within a few seconds to confirm before it plays.</p>
 
   <h3>Built-in limits</h3>
   <p>The app enforces cooldowns between plays, a daily soft cap of 8 plays, a hard cap of 20, and a long-press requirement during quiet hours (22:00 to 06:00). These are not suggestions.</p>
@@ -442,7 +420,7 @@
    ========================================================= */
 
 const IS_FILE_ORIGIN = location.protocol === "file:";
-const CATEGORIES = ["contact", "gather", "feeding", "warning", "location"];
+const CATEGORIES = ["heart", "fisharrows", "alert"];
 
 const RULES = {
   // Cooldowns disabled. Set to non-zero values if you ever want pacing back.
@@ -456,18 +434,18 @@ const RULES = {
   // quietStartHour: 22, quietEndHour: 6 if you want night-time long-press back.
   quietStartHour:      -1,
   quietEndHour:        -1,
-  warningConfirmWindowMs: 3000,
+  alertConfirmWindowMs: 3000,
   longPressMs:         1000,
 };
 
 /* ---------- State ---------- */
-const STATE_KEY = "flockcall.state.v1";
+const STATE_KEY = "flockcall.state.v2";
 
 function defaultState() {
   return {
     firstLaunchAcknowledged: false,
-    lastPlayedAt: { contact:0, gather:0, feeding:0, warning:0, location:0 },
-    lastVariant:  { contact:null, gather:null, feeding:null, warning:null, location:null },
+    lastPlayedAt: { heart: 0, fisharrows: 0, alert: 0 },
+    lastVariant:  { heart: null, fisharrows: null, alert: null },
     lastGlobalPlayAt: 0,
     dailyDate: todayString(),
     dailyPlayCount: 0,
@@ -480,7 +458,13 @@ function loadState() {
     const raw = localStorage.getItem(STATE_KEY);
     if (!raw) return defaultState();
     const s = JSON.parse(raw);
-    return Object.assign(defaultState(), s);
+    const d = defaultState();
+    return {
+      ...d,
+      ...s,
+      lastPlayedAt: { ...d.lastPlayedAt, ...(s.lastPlayedAt || {}) },
+      lastVariant: { ...d.lastVariant, ...(s.lastVariant || {}) },
+    };
   } catch (e) { return defaultState(); }
 }
 let saveTimer = null;
@@ -533,7 +517,7 @@ function canPlay(category, opts = {}) {
   }
 
   const lastForCat = state.lastPlayedAt[category] || 0;
-  const baseCooldown = (category === "warning") ? RULES.warningCooldownMs : RULES.perButtonCooldownMs;
+  const baseCooldown = (category === "alert") ? RULES.warningCooldownMs : RULES.perButtonCooldownMs;
   const cooldown = baseCooldown * taperMultiplier();
   if (now - lastForCat < cooldown) {
     const r = Math.ceil((cooldown - (now - lastForCat))/1000);
@@ -541,7 +525,7 @@ function canPlay(category, opts = {}) {
   }
 
   if (isQuietHours() && !opts.longPressConfirmed) return deny("Quiet hours, hold to play");
-  if (category === "warning" && !opts.warningConfirmed) return deny("Tap again to confirm");
+  if (category === "alert" && !opts.alertConfirmed) return deny("Tap again to confirm");
 
   return { allowed: true };
 }
@@ -553,18 +537,18 @@ function formatSec(s) {
 }
 
 /* ---------- Audio Manager ---------- */
-/* File slots. The app tries each extension below for every slot (.m4a, .mp3, .mp4,
-   .ogg, .wav). First match wins per slot. Gather loads Exports/Follow_Me first. */
+/* Export clips: filename stem before "_" matches the icon theme (Heart, Fish, Exclamation). */
+function exportAudioBase(fileStem) {
+  return "assets/audio/Exports/" + encodeURIComponent(fileStem);
+}
 const AUDIO_FILES = {
-  contact:  ["assets/audio/contact_01",  "assets/audio/contact_02"],
-  gather:   ["assets/audio/Exports/Follow_Me", "assets/audio/gather_01", "assets/audio/gather_02"],
-  feeding:  ["assets/audio/feeding_01",  "assets/audio/feeding_02"],
-  warning:  ["assets/audio/warning_01"],
-  location: ["assets/audio/location_01", "assets/audio/location_02"],
+  heart:      [exportAudioBase("Heart_Calm")],
+  fisharrows: [exportAudioBase("Fish&Arrows_Follow&Feeding")],
+  alert:      [exportAudioBase("Exclamation_Warning")],
 };
 const AUDIO_EXTS = [".m4a", ".mp3", ".mp4", ".ogg", ".wav"];
 
-const audioBuffers = { contact: [], gather: [], feeding: [], warning: [], location: [] };
+const audioBuffers = { heart: [], fisharrows: [], alert: [] };
 let usingPlaceholders = false;
 let audioCtx = null;
 
@@ -588,14 +572,9 @@ async function tryLoadAudioFiles() {
   if (IS_FILE_ORIGIN) return;
   let anyLoaded = false;
   for (const cat of CATEGORIES) {
-    let gatherExportDone = false;
     for (const base of AUDIO_FILES[cat]) {
-      if (cat === "gather" && gatherExportDone) break;
       const ok = await tryLoadOneBase(cat, base);
-      if (ok) {
-        anyLoaded = true;
-        if (cat === "gather" && base.indexOf("Follow_Me") !== -1) gatherExportDone = true;
-      }
+      if (ok) anyLoaded = true;
     }
   }
   if (!anyLoaded) {
@@ -631,11 +610,9 @@ function playRealClip(cat) {
 
 /* Placeholder tones. Intentionally not bird-like. Soft sines. */
 const PLACEHOLDER_SPECS = {
-  contact:  { freqs: [380],         dur: 0.7, env: "soft" },
-  gather:   { freqs: [340, 400],    dur: 1.0, env: "soft" },
-  feeding:  { freqs: [280],         dur: 1.2, env: "murmur" },
-  warning:  { freqs: [620],         dur: 0.35, env: "pulse" },
-  location: { freqs: [360],         dur: 0.9, env: "soft" },
+  heart:      { freqs: [360],      dur: 0.75, env: "soft" },
+  fisharrows: { freqs: [300, 380], dur: 1.0,  env: "soft" },
+  alert:      { freqs: [620],      dur: 0.35, env: "pulse" },
 };
 function playPlaceholder(cat) {
   ensureCtx();
@@ -714,7 +691,7 @@ function updateButtonSubs() {
     const cat = btn.dataset.cat;
     const sub = btn.querySelector(".sub");
     const last = state.lastPlayedAt[cat] || 0;
-    const baseCD = (cat === "warning") ? RULES.warningCooldownMs : RULES.perButtonCooldownMs;
+    const baseCD = (cat === "alert") ? RULES.warningCooldownMs : RULES.perButtonCooldownMs;
     const cd = baseCD * taperMultiplier();
     const remaining = cd - (now - last);
     btn.classList.remove("cooling", "confirm");
@@ -724,7 +701,7 @@ function updateButtonSubs() {
       btn.classList.add("cooling");
     } else if (isQuietHours()) {
       sub.textContent = "hold to play";
-    } else if (cat === "warning") {
+    } else if (cat === "alert") {
       sub.textContent = "double tap";
     } else {
       sub.textContent = "";
@@ -732,9 +709,9 @@ function updateButtonSubs() {
   });
 }
 
-/* Press handling. Supports normal tap, long press (quiet hours), and warning confirmation. */
+/* Press handling. Supports normal tap, long press (quiet hours), and alert double-tap. */
 const pressState = { timer: null, isLong: false, cat: null };
-const warningConfirmState = { armedAt: 0 };
+const alertConfirmState = { armedAt: 0 };
 
 function tryPlay(cat, opts) {
   const decision = canPlay(cat, opts);
@@ -768,18 +745,18 @@ function handlePressEnd(btn) {
     return;
   }
 
-  if (cat === "warning") {
+  if (cat === "alert") {
     const now = Date.now();
-    if (now - warningConfirmState.armedAt < RULES.warningConfirmWindowMs) {
-      warningConfirmState.armedAt = 0;
-      tryPlay(cat, { warningConfirmed: true, longPressConfirmed: pressState.isLong });
+    if (now - alertConfirmState.armedAt < RULES.alertConfirmWindowMs) {
+      alertConfirmState.armedAt = 0;
+      tryPlay(cat, { alertConfirmed: true, longPressConfirmed: pressState.isLong });
     } else {
-      warningConfirmState.armedAt = now;
+      alertConfirmState.armedAt = now;
       toast("tap again within 3s to confirm");
       const sub = btn.querySelector(".sub");
       sub.textContent = "confirm…";
       btn.classList.add("confirm");
-      setTimeout(() => { btn.classList.remove("confirm"); refreshStatus(); }, RULES.warningConfirmWindowMs);
+      setTimeout(() => { btn.classList.remove("confirm"); refreshStatus(); }, RULES.alertConfirmWindowMs);
     }
   } else {
     tryPlay(cat, { longPressConfirmed: pressState.isLong });
