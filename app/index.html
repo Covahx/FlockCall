@@ -160,7 +160,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 10px;
     cursor: pointer;
     transition: background 120ms, transform 120ms, opacity 120ms;
     touch-action: manipulation;
@@ -172,18 +172,30 @@
   .call[data-cat="heart"] .icon { color: var(--text); }
 
   .call .icon {
-    width: 56px;
-    height: 56px;
+    width: 76px;
+    height: 76px;
     color: var(--text);
     opacity: 0.92;
     flex-shrink: 0;
   }
+  .call .icon.icon-wide {
+    width: 104px;
+    height: 72px;
+  }
+  .call .label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+  }
+  .call.alert .label { color: var(--caution); }
   .call .sub {
     font-size: 11px;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    min-height: 14px;
+    letter-spacing: 0.06em;
+    min-height: 16px;
   }
   .call[disabled] {
     opacity: 0.4;
@@ -312,31 +324,40 @@
   </div>
 
   <main id="grid">
-    <button class="call" data-cat="heart" aria-label="Calm call (heart)">
-      <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M24 40 C10 30 6 20 12 14 C16 9 22 11 24 17 C26 11 32 9 36 14 C42 20 38 30 24 40 Z"/>
+    <button class="call alert" data-cat="alert" aria-label="Warning call; double tap to play">
+      <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="24" cy="24" r="17"/>
+        <line x1="24" y1="13" x2="24" y2="27"/>
+        <circle cx="24" cy="33" r="2.2" fill="currentColor"/>
       </svg>
+      <span class="label">Warning</span>
+      <span class="sub" data-sub="alert"></span>
+    </button>
+
+    <button class="call" data-cat="heart" aria-label="Calm call">
+      <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M24 41 C9 31 5 21 11 14 C15 9 21 11 24 18 C27 11 33 9 37 14 C43 21 39 31 24 41 Z"/>
+      </svg>
+      <span class="label">Calm</span>
       <span class="sub" data-sub="heart"></span>
     </button>
 
-    <button class="call" data-cat="fisharrows" aria-label="Follow and feeding call (fish and arrows)">
-      <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M4 24 C 8 16, 14 14, 22 24 C 14 34, 8 32, 4 24 Z"/>
-        <path d="M22 24 L 32 18 L 28 24 L 32 30 Z"/>
-        <circle cx="10" cy="22" r="1.5" fill="currentColor"/>
-        <path d="M34 16 L 44 24 L 34 32"/>
-        <path d="M34 24 L 42 24"/>
+    <button class="call" data-cat="fisharrows" aria-label="Foraging: eating and following calls">
+      <svg class="icon icon-wide" viewBox="0 0 100 52" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <!-- Eating: fish -->
+        <path d="M6 28 C 10 18, 18 16, 28 28 C 18 40, 10 38, 6 28 Z"/>
+        <path d="M28 28 L 38 22 L 34 28 L 38 34 Z"/>
+        <circle cx="12" cy="26" r="1.8" fill="currentColor"/>
+        <circle cx="16" cy="32" r="1.2" fill="currentColor" opacity="0.55"/>
+        <circle cx="20" cy="34" r="1" fill="currentColor" opacity="0.4"/>
+        <!-- Separator -->
+        <line x1="44" y1="10" x2="44" y2="42" stroke-opacity="0.35"/>
+        <!-- Following: spaced chevrons -->
+        <path d="M52 18 L 64 28 L 52 38"/>
+        <path d="M66 18 L 78 28 L 66 38"/>
       </svg>
+      <span class="label">Foraging</span>
       <span class="sub" data-sub="fisharrows"></span>
-    </button>
-
-    <button class="call alert" data-cat="alert" aria-label="Alert call (exclamation); double tap to play">
-      <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="24" cy="24" r="16"/>
-        <line x1="24" y1="14" x2="24" y2="26"/>
-        <circle cx="24" cy="32" r="2" fill="currentColor"/>
-      </svg>
-      <span class="sub" data-sub="alert"></span>
     </button>
   </main>
 
@@ -359,9 +380,9 @@
   <p>When the duckling stabilizes, turn on Taper Mode in settings. The app will become harder to use each day, by design.</p>
 
   <h3>What the three buttons mean</h3>
-  <p><strong>Heart:</strong> calm / reassurance call when the duckling needs settling.</p>
-  <p><strong>Fish and arrows:</strong> follow and feeding context — use sparingly during moves or near meal time.</p>
-  <p><strong>Exclamation:</strong> sharp alert, very rare. Tap twice within a few seconds to confirm before it plays.</p>
+  <p><strong>Warning (left):</strong> sharp alert, very rare. Tap twice within a few seconds to confirm before it plays.</p>
+  <p><strong>Calm (centre):</strong> reassurance when the duckling needs settling.</p>
+  <p><strong>Foraging (right):</strong> eating and following context — use sparingly near food or when moving the bird.</p>
 
   <h3>Built-in limits</h3>
   <p>The app enforces cooldowns between plays, a daily soft cap of 8 plays, a hard cap of 20, and a long-press requirement during quiet hours (22:00 to 06:00). These are not suggestions.</p>
