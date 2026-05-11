@@ -93,41 +93,6 @@
     align-items: center;
     justify-content: center;
   }
-  #file-protocol-banner {
-    background: #18222A;
-    color: var(--text);
-    font-size: 12px;
-    line-height: 1.45;
-    padding: 10px 14px;
-    margin: 0 12px 8px;
-    border-radius: 8px;
-    border: 1px solid var(--calm);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  #file-protocol-banner .row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 8px;
-  }
-  #file-protocol-banner code {
-    font-size: 11px;
-    background: #0E1418;
-    padding: 2px 5px;
-    border-radius: 4px;
-    word-break: break-all;
-  }
-  #file-protocol-banner button {
-    flex-shrink: 0;
-    background: transparent;
-    color: var(--calm);
-    border: 1px solid var(--calm);
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 11px;
-  }
   main {
     flex: 1;
     display: grid;
@@ -332,14 +297,6 @@
   <div id="status-row">
     <span id="status-dot"></span>
     <span id="status-text">ready</span>
-  </div>
-
-  <div id="file-protocol-banner" hidden>
-    <div class="row">
-      <span>You opened this page as a <strong>disk file</strong> (address starts with <code>file:///</code>). Browsers block loading your recordings that way, so you only hear the built-in test tones. Use <strong>http://localhost</strong> instead.</span>
-      <button type="button" id="file-banner-dismiss">ok</button>
-    </div>
-    <div>Easiest on Windows: double-click <code>serve_local.bat</code> in this folder, then in Edge open <code>http://localhost:8765/</code></div>
   </div>
 
   <main id="grid">
@@ -777,8 +734,6 @@ const els = {
   statusDot: document.getElementById("status-dot"),
   statusText: document.getElementById("status-text"),
   toast: document.getElementById("toast"),
-  fileProtocolBanner: document.getElementById("file-protocol-banner"),
-  fileBannerDismiss: document.getElementById("file-banner-dismiss"),
 };
 
 let toastTimer = null;
@@ -949,10 +904,6 @@ els.ackBtn.addEventListener("click", () => {
   els.info.hidden = true;
   refreshStatus();
 });
-els.fileBannerDismiss.addEventListener("click", () => {
-  els.fileProtocolBanner.hidden = true;
-});
-
 /* Settings UI */
 function refreshSettingsUI() {
   document.querySelectorAll("#gain-vals button").forEach(b => {
@@ -1012,12 +963,8 @@ if ("serviceWorker" in navigator && !IS_FILE_ORIGIN) {
 
 /* Init */
 (async function init() {
-  if (IS_FILE_ORIGIN) {
-    usingPlaceholders = true;
-    els.fileProtocolBanner.hidden = false;
-  } else {
-    await tryLoadAudioFiles();
-  }
+  if (IS_FILE_ORIGIN) usingPlaceholders = true;
+  else await tryLoadAudioFiles();
   if (!state.firstLaunchAcknowledged) showInfo(true);
   refreshStatus();
 })();
