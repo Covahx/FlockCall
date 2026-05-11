@@ -1,5 +1,9 @@
 # Deploy the static site in /app to GitHub Pages.
-# After the first successful run: Repo → Settings → Pages → ensure "Source" is GitHub Actions.
+# Repo → Settings → Pages → Source: GitHub Actions.
+#
+# Note: We intentionally omit actions/configure-pages. That action calls the
+# "get Pages site" API, which returns 404 until a site exists, which breaks
+# first-time setup for some repos. Plain static deploys do not require it.
 name: Deploy GitHub Pages
 
 on:
@@ -14,7 +18,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -26,9 +30,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -36,4 +37,4 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
