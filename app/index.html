@@ -82,7 +82,6 @@
   }
   #status-dot.cooling { background: var(--calm); }
   #status-dot.denied  { background: var(--denied); }
-  #status-dot.capped  { background: var(--caution); }
   #info-btn {
     background: transparent;
     border: 1px solid var(--muted);
@@ -293,28 +292,13 @@
   }
   .call.cooling .sub { color: var(--calm); }
   .call.confirm .sub { color: var(--caution); }
-  footer {
-    padding: 12px clamp(14px, 4vw, 22px) calc(16px + env(safe-area-inset-bottom));
-    color: var(--muted);
-    font-size: clamp(12px, 3.2vmin, 14px);
-    line-height: 1.4;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-  }
-  footer button {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid #2A343C;
-    border-radius: 8px;
-    min-height: 44px;
-    padding: 10px 14px;
-    font-size: clamp(12px, 3.2vmin, 14px);
-    touch-action: manipulation;
+  .app-footer {
+    flex-shrink: 0;
+    min-height: max(8px, env(safe-area-inset-bottom, 0px));
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
   }
 
-  /* In-app loudness (same as former output gain in settings) */
+  /* In-app clip level (device volume is separate) */
   .gain-strip {
     flex-shrink: 0;
     padding: 4px clamp(10px, 3vw, 18px) 10px;
@@ -390,28 +374,6 @@
     padding: 6px 12px;
     font-size: 13px;
   }
-  .setting-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #1F262C;
-  }
-  .setting-row .vals { display: flex; gap: 6px; }
-  .setting-row .vals button {
-    background: var(--surface);
-    color: var(--muted);
-    border: 1px solid #2A343C;
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-  .setting-row .vals button.active {
-    background: var(--surface-active);
-    color: var(--text);
-    border-color: var(--calm);
-  }
-
   /* Toast */
   #toast {
     position: fixed;
@@ -553,16 +515,13 @@
   <div class="gain-strip">
     <div class="gain-label" id="gain-strip-label">Audio Gain</div>
     <div id="gain-row" class="gain-row" role="toolbar" aria-labelledby="gain-strip-label">
-      <button type="button" class="gain-btn" data-gain="0.4" aria-pressed="false" title="Quieter">low</button>
+      <button type="button" class="gain-btn" data-gain="0.38" aria-pressed="false" title="Quieter, close range">low</button>
       <button type="button" class="gain-btn" data-gain="0.6" aria-pressed="false" title="Default">mid</button>
-      <button type="button" class="gain-btn" data-gain="0.7" aria-pressed="false" title="Louder for outdoors">outdoor</button>
+      <button type="button" class="gain-btn" data-gain="0.92" aria-pressed="false" title="Louder for distance or wind">outdoor</button>
     </div>
   </div>
 
-  <footer>
-    <span id="counter">today: 0</span>
-    <button id="settings-btn">settings</button>
-  </footer>
+  <footer class="app-footer"></footer>
 </div>
 
 <!-- First launch / Info overlay -->
@@ -575,54 +534,16 @@
   <h3>How to use it well</h3>
   <p>Use the app sparingly. Long silence is good. Outdoor time near water, with no playback, is better than any button in this app.</p>
   <p>Keep the speaker at arm's length from the bird. Never point it directly at the duckling from close range. If the bird startles or freezes, stop and give it quiet space.</p>
-  <p>When the duckling stabilizes, turn on Taper Mode in settings. The app will become harder to use each day, by design.</p>
+  <p>Use the app less as the duckling stabilizes.</p>
 
   <h3>What the three buttons mean</h3>
   <p><strong>Warning (left):</strong> sharp alert, very rare. Tap twice within a few seconds to confirm before it plays.</p>
   <p><strong>Calm (centre):</strong> reassurance when the duckling needs settling.</p>
   <p><strong>Follow / Foraging (right):</strong> following and feeding context — use sparingly near food or when moving the bird. Check <strong>Repeat</strong> on that pad to loop the clip until you turn it off or tap another button.</p>
 
-  <h3>Built-in limits</h3>
-  <p><strong>This build:</strong> strict cooldowns, daily caps, and quiet-hour long-press are turned off in code so you can test freely; the footer still shows a <strong>today</strong> play count for awareness. Warning still needs a <strong>double tap</strong> to confirm. Re-tighten limits in <code>RULES</code> before any field use where you want the app to enforce pacing. In every situation, keep real playback minimal.</p>
+  <p style="font-size:13px;color:var(--muted);margin-top:1.25rem">FlockCall is an offline, ad-free, telemetry-free prototype. Source audio ethically before any use with a real bird.</p>
 
   <button id="ack-btn" class="ack" hidden>I understand. I will keep playback minimal and reduce app use as the duckling stabilizes.</button>
-</div>
-
-<!-- Settings overlay -->
-<div id="settings" class="overlay" hidden>
-  <button class="close" data-close>close</button>
-  <h2>Settings</h2>
-
-  <div class="setting-row">
-    <div>
-      <div>Taper mode</div>
-      <div style="font-size:12px;color:var(--muted)">Cooldowns scale up 1.5x per day for 7 days.</div>
-    </div>
-    <div class="vals" id="taper-vals">
-      <button data-taper="off">off</button>
-      <button data-taper="on">on</button>
-    </div>
-  </div>
-
-  <div class="setting-row">
-    <div>
-      <div>Reset daily counter</div>
-      <div style="font-size:12px;color:var(--muted)">Use only if needed for testing.</div>
-    </div>
-    <div class="vals">
-      <button id="reset-daily">reset</button>
-    </div>
-  </div>
-
-  <div id="audio-load-status" class="setting-row" hidden>
-    <div>
-      <div>Test tones only</div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.45">No clip files were loaded from <code style="font-size:11px;word-break:break-all">assets/audio/Exports/</code> (missing on the server, wrong path, or blocked). The pads use soft beeps until a clip loads. This app tries <strong>Web Audio</strong> first, then a plain <strong>HTML audio</strong> fallback if decoding fails. Some privacy or ad-blocking browsers still block both—use normal Chrome or Safari if you only hear beeps. On iPhone, <strong>.m4a</strong> often decodes more reliably than some <strong>.mp4</strong> files. Locally, use <code style="font-size:11px">http://</code> and keep exports next to the app.</div>
-    </div>
-  </div>
-
-  <h3>About</h3>
-  <p style="font-size:13px;color:var(--muted)">FlockCall is an offline, ad-free, telemetry-free prototype. Source audio ethically (Xeno-canto, Macaulay Library) before any use with a real bird.</p>
 </div>
 
 <div id="toast"></div>
@@ -637,23 +558,32 @@ const IS_FILE_ORIGIN = location.protocol === "file:";
 const CATEGORIES = ["heart", "fisharrows", "alert"];
 
 const RULES = {
-  // Cooldowns disabled. Set to non-zero values if you ever want pacing back.
   perButtonCooldownMs: 0,
   globalCooldownMs:    0,
   warningCooldownMs:   0,
-  // Daily caps disabled; counter still ticks for awareness only.
-  dailySoftCap:        9999,
-  dailyHardCap:        9999,
-  // Quiet hours disabled by making the window empty. Restore by setting
-  // quietStartHour: 22, quietEndHour: 6 if you want night-time long-press back.
   quietStartHour:      -1,
   quietEndHour:        -1,
   alertConfirmWindowMs: 3000,
   longPressMs:         1000,
 };
 
+/** In-app gain: low (close / careful), mid (default), outdoor (distance, wind). */
+const GAIN_LEVELS = [0.38, 0.6, 0.92];
+function normalizeOutputGain(g) {
+  if (!Number.isFinite(g)) return 0.6;
+  if (GAIN_LEVELS.indexOf(g) !== -1) return g;
+  const legacy = { 0.4: 0.38, 0.42: 0.38, 0.7: 0.92, 0.88: 0.92 };
+  if (legacy[g] !== undefined) return legacy[g];
+  let best = GAIN_LEVELS[0], bestD = Infinity;
+  for (const x of GAIN_LEVELS) {
+    const d = Math.abs(x - g);
+    if (d < bestD) { bestD = d; best = x; }
+  }
+  return best;
+}
+
 /* ---------- State ---------- */
-const STATE_KEY = "flockcall.state.v3";
+const STATE_KEY = "flockcall.state.v4";
 
 function defaultState() {
   return {
@@ -661,24 +591,30 @@ function defaultState() {
     lastPlayedAt: { heart: 0, fisharrows: 0, alert: 0 },
     lastVariant:  { heart: null, fisharrows: null, alert: null },
     lastGlobalPlayAt: 0,
-    dailyDate: todayString(),
-    dailyPlayCount: 0,
     outputGain: 0.6,
-    taperMode: { enabled: false, startDate: null },
     foragingLoop: false,
   };
 }
 function loadState() {
   try {
-    const raw = localStorage.getItem(STATE_KEY);
+    let raw = localStorage.getItem(STATE_KEY);
+    if (!raw) {
+      raw = localStorage.getItem("flockcall.state.v3");
+      if (raw) {
+        try {
+          localStorage.setItem(STATE_KEY, raw);
+        } catch (e) { /* quota */ }
+      }
+    }
     if (!raw) return defaultState();
     const s = JSON.parse(raw);
     const d = defaultState();
     return {
-      ...d,
-      ...s,
+      firstLaunchAcknowledged: !!s.firstLaunchAcknowledged,
       lastPlayedAt: { ...d.lastPlayedAt, ...(s.lastPlayedAt || {}) },
       lastVariant: { ...d.lastVariant, ...(s.lastVariant || {}) },
+      lastGlobalPlayAt: typeof s.lastGlobalPlayAt === "number" ? s.lastGlobalPlayAt : d.lastGlobalPlayAt,
+      outputGain: normalizeOutputGain(typeof s.outputGain === "number" ? s.outputGain : d.outputGain),
       foragingLoop: typeof s.foragingLoop === "boolean" ? s.foragingLoop : d.foragingLoop,
     };
   } catch (e) { return defaultState(); }
@@ -690,11 +626,6 @@ function saveState() {
     localStorage.setItem(STATE_KEY, JSON.stringify(state));
   }, 250);
 }
-function todayString() {
-  const d = new Date();
-  return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
-}
-
 let state = loadState();
 
 /* ---------- Time helpers ---------- */
@@ -703,29 +634,12 @@ function isQuietHours(now=new Date()) {
   const h = now.getHours();
   return h >= RULES.quietStartHour || h < RULES.quietEndHour;
 }
-function rolloverDailyIfNeeded() {
-  const t = todayString();
-  if (state.dailyDate !== t) {
-    state.dailyDate = t;
-    state.dailyPlayCount = 0;
-    saveState();
-  }
-}
-function taperMultiplier() {
-  if (!state.taperMode.enabled || !state.taperMode.startDate) return 1;
-  const start = new Date(state.taperMode.startDate);
-  const days = Math.floor((Date.now() - start.getTime()) / 86400000);
-  if (days >= 7) return 999;
-  return Math.pow(1.5, Math.max(0, days));
-}
 
 /* ---------- Rules layer (pure) ---------- */
 function canPlay(category, opts = {}) {
-  rolloverDailyIfNeeded();
   const now = Date.now();
 
   if (!state.firstLaunchAcknowledged) return deny("Please read the info screen first.");
-  if (state.dailyPlayCount >= RULES.dailyHardCap) return deny("Rest period; the duckling benefits from quiet.");
 
   if (now - state.lastGlobalPlayAt < RULES.globalCooldownMs) {
     const r = Math.ceil((RULES.globalCooldownMs - (now - state.lastGlobalPlayAt))/1000);
@@ -734,7 +648,7 @@ function canPlay(category, opts = {}) {
 
   const lastForCat = state.lastPlayedAt[category] || 0;
   const baseCooldown = (category === "alert") ? RULES.warningCooldownMs : RULES.perButtonCooldownMs;
-  const cooldown = baseCooldown * taperMultiplier();
+  const cooldown = baseCooldown;
   if (now - lastForCat < cooldown) {
     const r = Math.ceil((cooldown - (now - lastForCat))/1000);
     return deny("Cooling " + formatSec(r));
@@ -767,7 +681,6 @@ const AUDIO_EXTS = [".m4a", ".mp3", ".mp4", ".ogg", ".wav"];
 const audioBuffers = { heart: [], fisharrows: [], alert: [] };
 /** When Web Audio decode fails: resolved URL for HTML5 Audio fallback (some privacy browsers). */
 const htmlAudioUrl = { heart: null, fisharrows: null, alert: null };
-let usingPlaceholders = false;
 let audioCtx = null;
 
 /* Layering: up to 2 one-shots per button; foraging loop allows only one stream. */
@@ -888,7 +801,6 @@ async function tryLoadAudioFiles() {
   for (const cat of CATEGORIES) {
     if (audioBuffers[cat].length === 0) await tryProbeHtmlAudioForCat(cat);
   }
-  usingPlaceholders = CATEGORIES.every(c => !audioBuffers[c].length && !htmlAudioUrl[c]);
 }
 
 function ensureCtx() {
@@ -1028,11 +940,8 @@ function applyGainToLivePlayback() {
 const els = {
   app: document.getElementById("app"),
   info: document.getElementById("info"),
-  settings: document.getElementById("settings"),
   infoBtn: document.getElementById("info-btn"),
-  settingsBtn: document.getElementById("settings-btn"),
   ackBtn: document.getElementById("ack-btn"),
-  counter: document.getElementById("counter"),
   statusDot: document.getElementById("status-dot"),
   statusText: document.getElementById("status-text"),
   toast: document.getElementById("toast"),
@@ -1051,12 +960,6 @@ function setStatus(text, kind="ready") {
   els.statusDot.className = "";
   if (kind === "cooling") els.statusDot.classList.add("cooling");
   else if (kind === "denied") els.statusDot.classList.add("denied");
-  else if (kind === "capped") els.statusDot.classList.add("capped");
-}
-
-function updateCounter() {
-  rolloverDailyIfNeeded();
-  els.counter.textContent = "today: " + state.dailyPlayCount;
 }
 
 function updateButtonSubs() {
@@ -1066,7 +969,7 @@ function updateButtonSubs() {
     const sub = btn.querySelector(".sub");
     const last = state.lastPlayedAt[cat] || 0;
     const baseCD = (cat === "alert") ? RULES.warningCooldownMs : RULES.perButtonCooldownMs;
-    const cd = baseCD * taperMultiplier();
+    const cd = baseCD;
     const remaining = cd - (now - last);
     btn.classList.remove("cooling", "confirm");
     if (remaining > 0) {
@@ -1104,14 +1007,10 @@ function tryPlay(cat, opts) {
   }
   state.lastPlayedAt[cat] = Date.now();
   state.lastGlobalPlayAt = Date.now();
-  state.dailyPlayCount += 1;
   saveState();
 
   playCategory(cat);
-  updateCounter();
   refreshStatus();
-
-  if (state.dailyPlayCount === RULES.dailySoftCap) toast("consider resting", 2500);
 }
 
 function handlePressEnd(btn) {
@@ -1185,13 +1084,11 @@ document.querySelectorAll(".call").forEach(btn => {
 });
 
 function refreshStatus() {
-  rolloverDailyIfNeeded();
   if (isQuietHours()) {
     setStatus("quiet hours", "cooling");
   } else {
     setStatus("ready", "ready");
   }
-  updateCounter();
   updateButtonSubs();
 }
 
@@ -1200,16 +1097,10 @@ function showInfo(showAck) {
   els.info.hidden = false;
   els.ackBtn.hidden = !showAck;
 }
-function showSettings() {
-  els.settings.hidden = false;
-  refreshSettingsUI();
-}
 document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => {
   els.info.hidden = true;
-  els.settings.hidden = true;
 }));
 els.infoBtn.addEventListener("click", () => showInfo(false));
-els.settingsBtn.addEventListener("click", showSettings);
 els.ackBtn.addEventListener("click", () => {
   state.firstLaunchAcknowledged = true;
   saveState();
@@ -1221,14 +1112,6 @@ function refreshGainUI() {
     const on = Number(b.dataset.gain) === state.outputGain;
     b.classList.toggle("active", on);
     b.setAttribute("aria-pressed", on ? "true" : "false");
-  });
-}
-
-/* Settings UI */
-function refreshSettingsUI() {
-  document.querySelectorAll("#taper-vals button").forEach(b => {
-    const isOn = b.dataset.taper === "on";
-    b.classList.toggle("active", isOn === state.taperMode.enabled);
   });
 }
 
@@ -1245,15 +1128,6 @@ document.querySelectorAll("#gain-row .gain-btn").forEach(b => {
     applyGainToLivePlayback();
   });
 });
-document.querySelectorAll("#taper-vals button").forEach(b => {
-  b.addEventListener("click", () => {
-    const on = b.dataset.taper === "on";
-    state.taperMode.enabled = on;
-    state.taperMode.startDate = on ? new Date().toISOString() : null;
-    saveState(); refreshSettingsUI();
-    if (on) toast("taper mode on; cooldowns will grow daily");
-  });
-});
 document.getElementById("foraging-loop-cb").addEventListener("change", (e) => {
   e.stopPropagation();
   const on = e.target.checked;
@@ -1262,13 +1136,6 @@ document.getElementById("foraging-loop-cb").addEventListener("change", (e) => {
   if (was && !on) stopCategoryPlayback("fisharrows");
   saveState();
 });
-document.getElementById("reset-daily").addEventListener("click", () => {
-  state.dailyPlayCount = 0;
-  saveState();
-  refreshStatus();
-  toast("daily counter reset");
-});
-
 /* Tick loop for status countdown */
 setInterval(refreshStatus, 1000);
 
@@ -1281,10 +1148,7 @@ if ("serviceWorker" in navigator && !IS_FILE_ORIGIN) {
 
 /* Init */
 (async function init() {
-  if (IS_FILE_ORIGIN) usingPlaceholders = true;
-  else await tryLoadAudioFiles();
-  const audioLoadStatus = document.getElementById("audio-load-status");
-  if (audioLoadStatus) audioLoadStatus.hidden = !usingPlaceholders;
+  if (!IS_FILE_ORIGIN) await tryLoadAudioFiles();
   if (!state.firstLaunchAcknowledged) showInfo(true);
   updateForagingLoopToggle();
   refreshGainUI();
