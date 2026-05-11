@@ -21,6 +21,9 @@
     --caution: #B58A4A;
     --ready: #5F8A6B;
     --denied: #8E5F5F;
+    /* Shorter pads; foraging repeat row — extra bottom padding on Warning/Calm keeps icons aligned */
+    --pad-min-h: clamp(112px, 25svmin, 198px);
+    --foraging-repeat-stack: 42px;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html {
@@ -97,10 +100,16 @@
     flex: 1;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: 1fr;
+    grid-template-rows: 1fr auto;
     gap: clamp(8px, 2.4vw, 14px);
-    padding: clamp(8px, 2.2vw, 16px) clamp(6px, 1.8vw, 14px);
-    align-content: stretch;
+    padding: clamp(6px, 1.8vw, 14px) clamp(6px, 1.8vw, 14px) clamp(4px, 1.2vw, 10px);
+    min-height: 0;
+  }
+  /* Pads sit in the bottom row so they stay in easy thumb reach */
+  main#grid > .call,
+  main#grid > .foraging-stack {
+    grid-row: 2;
+    align-self: stretch;
     min-height: 0;
   }
 
@@ -113,9 +122,11 @@
   }
   .foraging-card {
     flex: 1;
-    min-height: 0;
+    min-height: var(--pad-min-h);
+    height: 100%;
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     background: var(--surface);
     color: var(--text);
     border: 1px solid #2A343C;
@@ -123,26 +134,29 @@
     overflow: hidden;
   }
   .foraging-main.call {
-    flex: 1;
+    flex: 1 1 0;
     min-height: 0;
-    height: auto;
+    width: 100%;
     border: none;
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    padding-bottom: clamp(4px, 1vmin, 8px);
+    justify-content: center;
+    align-items: center;
+    gap: clamp(5px, 1.5vmin, 10px);
+    padding: clamp(10px, 3vmin, 18px) clamp(6px, 1.5vw, 10px) clamp(4px, 1vmin, 8px);
   }
   .foraging-repeat-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
+    flex: 0 0 auto;
     flex-shrink: 0;
-    min-height: 48px;
-    padding: 10px 12px 14px;
+    padding: 2px 8px max(8px, env(safe-area-inset-bottom, 0px));
+    margin: 0;
     cursor: pointer;
     touch-action: manipulation;
-    border-top: 1px solid #243038;
     user-select: none;
     -webkit-user-select: none;
   }
@@ -154,7 +168,7 @@
     cursor: pointer;
   }
   .foraging-repeat-text {
-    font-size: clamp(13px, 3.6vmin, 16px);
+    font-size: clamp(12px, 3.4vmin, 16px);
     font-weight: 600;
     color: var(--muted);
     letter-spacing: 0.03em;
@@ -168,8 +182,8 @@
     color: var(--text);
     border: 1px solid #2A343C;
     border-radius: clamp(12px, 3.2vw, 18px);
-    padding: clamp(12px, 3.5vmin, 22px) clamp(6px, 1.5vw, 10px);
-    min-height: clamp(148px, 34svmin, 260px);
+    padding: clamp(10px, 3vmin, 18px) clamp(6px, 1.5vw, 10px);
+    min-height: var(--pad-min-h);
     height: 100%;
     min-width: 0;
     display: flex;
@@ -186,6 +200,11 @@
   .call.alert .icon { color: var(--caution); }
   .call[data-cat="heart"] { border-color: var(--calm); }
   .call[data-cat="heart"] .icon { color: var(--text); }
+  /* After .call padding shorthand: extra bottom space mirrors foraging repeat strip so icons align */
+  main#grid > .call.alert,
+  main#grid > .call[data-cat="heart"] {
+    padding-bottom: calc(clamp(10px, 3vmin, 18px) + var(--foraging-repeat-stack));
+  }
 
   .call .icon {
     width: clamp(76px, 24vmin, 112px);
@@ -193,12 +212,6 @@
     color: var(--text);
     opacity: 0.95;
     flex-shrink: 0;
-  }
-  .call .icon.icon-wide {
-    width: min(100%, clamp(88px, 42vw, 148px));
-    height: auto;
-    aspect-ratio: 108 / 52;
-    max-height: clamp(60px, 22vmin, 96px);
   }
   .call .label {
     font-size: clamp(17px, 5vmin, 24px);
@@ -328,19 +341,22 @@
 
   /* Short phones / landscape: keep controls usable without scrolling */
   @media (max-height: 520px) {
-    .foraging-repeat-row { min-height: 44px; padding: 6px 8px 10px; }
+    :root { --pad-min-h: clamp(96px, 22svmin, 168px); --foraging-repeat-stack: 34px; }
+    .foraging-repeat-row { padding: 0 6px 6px; }
+    .foraging-loop-cb { width: 20px; height: 20px; }
     .call {
       min-height: 0;
-      padding-top: clamp(8px, 2vmin, 14px);
-      padding-bottom: clamp(8px, 2vmin, 14px);
+      padding-top: clamp(6px, 1.8vmin, 12px);
+      padding-bottom: clamp(6px, 1.8vmin, 12px);
       gap: 4px;
+    }
+    main#grid > .call.alert,
+    main#grid > .call[data-cat="heart"] {
+      padding-bottom: calc(clamp(6px, 1.8vmin, 12px) + var(--foraging-repeat-stack));
     }
     .call .icon {
       width: clamp(56px, 18vmin, 84px);
       height: clamp(56px, 18vmin, 84px);
-    }
-    .call .icon.icon-wide {
-      max-height: clamp(46px, 16vmin, 68px);
     }
     .call .label { font-size: clamp(14px, 4vmin, 19px); }
     .call .sub { font-size: clamp(11px, 3vmin, 14px); }
@@ -382,7 +398,7 @@
     <div class="foraging-stack">
       <div class="foraging-card">
         <button type="button" class="call foraging-main" data-cat="fisharrows" aria-label="Follow and foraging calls">
-          <svg class="icon icon-wide" viewBox="0 0 108 52" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 108 52" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M 30 14 L 14 28 L 30 42"/>
             <path d="M 46 14 L 30 28 L 46 42"/>
             <line x1="56" y1="10" x2="56" y2="42" stroke-opacity="0.35"/>
@@ -469,6 +485,13 @@
     </div>
     <div class="vals">
       <button id="reset-daily">reset</button>
+    </div>
+  </div>
+
+  <div id="audio-load-status" class="setting-row" hidden>
+    <div>
+      <div>Test tones only</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.45">No clip files were loaded from <code style="font-size:11px;word-break:break-all">assets/audio/Exports/</code> (missing on the server, wrong path, or blocked request). The pads use soft beeps on every device until those files are deployed with the site. Locally, use an <code style="font-size:11px">http://</code> server and keep the exports next to the app.</div>
     </div>
   </div>
 
@@ -1021,6 +1044,8 @@ if ("serviceWorker" in navigator && !IS_FILE_ORIGIN) {
 (async function init() {
   if (IS_FILE_ORIGIN) usingPlaceholders = true;
   else await tryLoadAudioFiles();
+  const audioLoadStatus = document.getElementById("audio-load-status");
+  if (audioLoadStatus) audioLoadStatus.hidden = !usingPlaceholders;
   if (!state.firstLaunchAcknowledged) showInfo(true);
   updateForagingLoopToggle();
   refreshStatus();
