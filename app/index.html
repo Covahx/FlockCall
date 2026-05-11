@@ -134,8 +134,7 @@
     color: var(--text);
     border: 1px solid var(--calm);
     border-radius: clamp(12px, 3.2vw, 18px);
-    /* overflow:hidden clipped the scaled foraging SVG — looked tiny / broken */
-    overflow: visible;
+    overflow: hidden;
   }
   .foraging-main.call {
     flex: 1 1 0;
@@ -149,7 +148,17 @@
     align-items: center;
     gap: clamp(5px, 1.5vmin, 10px);
     padding: clamp(10px, 3vmin, 18px) clamp(6px, 1.5vw, 10px) clamp(4px, 1vmin, 8px);
-    overflow: visible;
+    overflow: hidden;
+  }
+  /* Keeps stacked foraging art inside the pad (no bleed past rounded rect) */
+  .foraging-icon-slot {
+    width: var(--icon-box);
+    height: var(--icon-box);
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .foraging-repeat-row {
     display: flex;
@@ -223,10 +232,14 @@
     opacity: 0.95;
     flex-shrink: 0;
   }
-  /* Wide viewBox (108×52) letterboxes in a square; slight scale matches heart/warning visually */
-  .foraging-main.call .icon {
-    transform: scale(1.12);
-    transform-origin: center center;
+  /* Fill the slot without fixed --icon-box (would override .call .icon otherwise) */
+  .foraging-main.call .foraging-icon-slot .icon {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    flex-shrink: 0;
   }
   .call .label {
     font-size: clamp(17px, 5vmin, 24px);
@@ -394,7 +407,6 @@
     main#grid > .call[data-cat="heart"] {
       padding-bottom: calc(clamp(6px, 1.8vmin, 12px) + var(--foraging-repeat-stack));
     }
-    .foraging-main.call .icon { transform: scale(1.08); }
     .call .label { font-size: clamp(14px, 4vmin, 19px); }
     .call .sub { font-size: clamp(11px, 3vmin, 14px); }
   }
@@ -435,18 +447,20 @@
     <div class="foraging-stack">
       <div class="foraging-card">
         <button type="button" class="call foraging-main" data-cat="fisharrows" aria-label="Follow and foraging calls">
-          <svg class="icon" viewBox="0 0 108 52" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M 30 14 L 14 28 L 30 42"/>
-            <path d="M 46 14 L 30 28 L 46 42"/>
-            <line x1="56" y1="10" x2="56" y2="42" stroke-opacity="0.35"/>
-            <g transform="translate(70, 0)">
-              <path d="M6 28 C 10 18, 18 16, 28 28 C 18 40, 10 38, 6 28 Z"/>
-              <path d="M28 28 L 38 22 L 34 28 L 38 34 Z"/>
-              <circle cx="12" cy="26" r="1.8" fill="currentColor"/>
-              <circle cx="16" cy="32" r="1.2" fill="currentColor" opacity="0.55"/>
-              <circle cx="20" cy="34" r="1" fill="currentColor" opacity="0.4"/>
-            </g>
+          <span class="foraging-icon-slot" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 64 100" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <!-- Follow arrows (pair), stacked above fish -->
+            <path d="M 20 12 L 8 26 L 20 40"/>
+            <path d="M 44 12 L 32 26 L 44 40"/>
+            <line x1="14" y1="46" x2="50" y2="46" stroke-opacity="0.35"/>
+            <!-- Fish / feeding -->
+            <path d="M 16 78 C 22 62, 42 58, 50 78 C 42 96, 22 94, 16 78 Z"/>
+            <path d="M 50 78 L 58 70 L 54 78 L 58 86 Z"/>
+            <circle cx="28" cy="74" r="2" fill="currentColor"/>
+            <circle cx="32" cy="82" r="1.3" fill="currentColor" opacity="0.55"/>
+            <circle cx="36" cy="84" r="1" fill="currentColor" opacity="0.4"/>
           </svg>
+          </span>
           <span class="label">Follow / Foraging</span>
           <span class="sub" data-sub="fisharrows"></span>
         </button>
