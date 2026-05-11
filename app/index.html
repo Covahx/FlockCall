@@ -473,7 +473,7 @@
   </main>
 
   <footer>
-    <span id="counter">session: 0 / suggested 8</span>
+    <span id="counter">today: 0</span>
     <button id="settings-btn">settings</button>
   </footer>
 </div>
@@ -496,7 +496,7 @@
   <p><strong>Follow / Foraging (right):</strong> following and feeding context — use sparingly near food or when moving the bird. Check <strong>Repeat</strong> on that pad to loop the clip until you turn it off or tap another button.</p>
 
   <h3>Built-in limits</h3>
-  <p>The app enforces cooldowns between plays, a daily soft cap of 8 plays, a hard cap of 20, and a long-press requirement during quiet hours (22:00 to 06:00). These are not suggestions.</p>
+  <p><strong>This build:</strong> strict cooldowns, daily caps, and quiet-hour long-press are turned off in code so you can test freely; the footer still shows a <strong>today</strong> play count for awareness. Warning still needs a <strong>double tap</strong> to confirm. Re-tighten limits in <code>RULES</code> before any field use where you want the app to enforce pacing. In every situation, keep real playback minimal.</p>
 
   <button id="ack-btn" class="ack" hidden>I understand. I will keep playback minimal and reduce app use as the duckling stabilizes.</button>
 </div>
@@ -1002,6 +1002,16 @@ document.querySelectorAll(".call").forEach(btn => {
   btn.addEventListener("mousedown", start);
   btn.addEventListener("mouseup", end);
   btn.addEventListener("mouseleave", cancel);
+  /* Keyboard / assistive tech: no click follows from our mouse path alone; Enter/Space activate */
+  btn.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    if (e.repeat) return;
+    e.preventDefault();
+    clearTimeout(pressState.timer);
+    pressState.cat = btn.dataset.cat;
+    pressState.isLong = false;
+    handlePressEnd(btn);
+  });
 });
 
 function refreshStatus() {
