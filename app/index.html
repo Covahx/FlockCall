@@ -181,31 +181,31 @@
   .call[data-cat="heart"] .icon { color: var(--text); }
 
   .call .icon {
-    width: clamp(64px, 20vmin, 92px);
-    height: clamp(64px, 20vmin, 92px);
+    width: clamp(76px, 24vmin, 112px);
+    height: clamp(76px, 24vmin, 112px);
     color: var(--text);
     opacity: 0.95;
     flex-shrink: 0;
   }
   .call .icon.icon-wide {
-    width: min(100%, clamp(72px, 36vw, 124px));
+    width: min(100%, clamp(88px, 42vw, 148px));
     height: auto;
-    aspect-ratio: 100 / 52;
-    max-height: clamp(52px, 19vmin, 80px);
+    aspect-ratio: 108 / 52;
+    max-height: clamp(60px, 22vmin, 96px);
   }
   .call .label {
-    font-size: clamp(15px, 4.2vmin, 20px);
+    font-size: clamp(17px, 5vmin, 24px);
     font-weight: 700;
     color: var(--text);
     letter-spacing: 0.02em;
-    line-height: 1.25;
+    line-height: 1.2;
     text-align: center;
     max-width: 100%;
     padding: 0 2px;
   }
   .call.alert .label { color: var(--caution); }
   .call .sub {
-    font-size: clamp(11px, 3.1vmin, 14px);
+    font-size: clamp(12px, 3.5vmin, 16px);
     color: var(--muted);
     text-transform: none;
     letter-spacing: 0.02em;
@@ -329,13 +329,14 @@
       gap: 4px;
     }
     .call .icon {
-      width: clamp(48px, 16vmin, 72px);
-      height: clamp(48px, 16vmin, 72px);
+      width: clamp(56px, 18vmin, 84px);
+      height: clamp(56px, 18vmin, 84px);
     }
     .call .icon.icon-wide {
-      max-height: clamp(40px, 14vmin, 56px);
+      max-height: clamp(46px, 16vmin, 68px);
     }
-    .call .label { font-size: clamp(13px, 3.8vmin, 17px); }
+    .call .label { font-size: clamp(14px, 4vmin, 19px); }
+    .call .sub { font-size: clamp(11px, 3vmin, 14px); }
   }
 </style>
 </head>
@@ -354,7 +355,7 @@
 
   <main id="grid">
     <button class="call alert" data-cat="alert" aria-label="Warning call; double tap to play">
-      <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="24" cy="24" r="17"/>
         <line x1="24" y1="13" x2="24" y2="27"/>
         <circle cx="24" cy="33" r="2.2" fill="currentColor"/>
@@ -364,7 +365,7 @@
     </button>
 
     <button class="call" data-cat="heart" aria-label="Calm call">
-      <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M24 41 C9 31 5 21 11 14 C15 9 21 11 24 18 C27 11 33 9 37 14 C43 21 39 31 24 41 Z"/>
       </svg>
       <span class="label">Calm</span>
@@ -372,18 +373,21 @@
     </button>
 
     <div class="foraging-stack">
-      <button class="call" data-cat="fisharrows" aria-label="Foraging: eating and following calls">
-        <svg class="icon icon-wide" viewBox="0 0 100 52" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M6 28 C 10 18, 18 16, 28 28 C 18 40, 10 38, 6 28 Z"/>
-          <path d="M28 28 L 38 22 L 34 28 L 38 34 Z"/>
-          <circle cx="12" cy="26" r="1.8" fill="currentColor"/>
-          <circle cx="16" cy="32" r="1.2" fill="currentColor" opacity="0.55"/>
-          <circle cx="20" cy="34" r="1" fill="currentColor" opacity="0.4"/>
-          <line x1="44" y1="10" x2="44" y2="42" stroke-opacity="0.35"/>
-          <path d="M52 18 L 64 28 L 52 38"/>
-          <path d="M66 18 L 78 28 L 66 38"/>
+      <button class="call" data-cat="fisharrows" aria-label="Follow and foraging calls">
+        <svg class="icon icon-wide" viewBox="0 0 108 52" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <!-- Follow: chevrons point left, then gap, divider, gap, fish -->
+          <path d="M 30 14 L 14 28 L 30 42"/>
+          <path d="M 46 14 L 30 28 L 46 42"/>
+          <line x1="56" y1="10" x2="56" y2="42" stroke-opacity="0.35"/>
+          <g transform="translate(70, 0)">
+            <path d="M6 28 C 10 18, 18 16, 28 28 C 18 40, 10 38, 6 28 Z"/>
+            <path d="M28 28 L 38 22 L 34 28 L 38 34 Z"/>
+            <circle cx="12" cy="26" r="1.8" fill="currentColor"/>
+            <circle cx="16" cy="32" r="1.2" fill="currentColor" opacity="0.55"/>
+            <circle cx="20" cy="34" r="1" fill="currentColor" opacity="0.4"/>
+          </g>
         </svg>
-        <span class="label">Foraging</span>
+        <span class="label">Follow / Foraging</span>
         <span class="sub" data-sub="fisharrows"></span>
       </button>
       <div class="foraging-loop-control">
@@ -414,7 +418,7 @@
   <h3>What the three buttons mean</h3>
   <p><strong>Warning (left):</strong> sharp alert, very rare. Tap twice within a few seconds to confirm before it plays.</p>
   <p><strong>Calm (centre):</strong> reassurance when the duckling needs settling.</p>
-  <p><strong>Foraging (right):</strong> eating and following context — use sparingly near food or when moving the bird. Use <strong>Repeat</strong> under the pad to loop the clip until you turn it off or tap another button.</p>
+  <p><strong>Follow / Foraging (right):</strong> following and feeding context — use sparingly near food or when moving the bird. Use <strong>Repeat</strong> under the pad to loop the clip until you turn it off or tap another button.</p>
 
   <h3>Built-in limits</h3>
   <p>The app enforces cooldowns between plays, a daily soft cap of 8 plays, a hard cap of 20, and a long-press requirement during quiet hours (22:00 to 06:00). These are not suggestions.</p>
