@@ -13,7 +13,7 @@ app/
   assets/audio/      drop real merganser .m4a files here when sourced
 ```
 
-If the audio folder is empty, the app plays soft synthesized placeholder tones with a yellow banner reminding you to replace them. Do not use the placeholders with a real duckling.
+If the audio folder is empty, the app plays soft synthesized placeholder tones (no on-screen banner). Do not use the placeholders with a real duckling.
 
 ---
 
@@ -71,7 +71,7 @@ Transferring to another phone: send the same `.apk` file by any means (email, Dr
 
 Source real, ethically-licensed merganser calls (see `app/assets/audio/README.txt` for details). Encode them as mono AAC `.m4a` at 96 to 128 kbps, 0.8 to 2.5 seconds each, peak normalized to -6 dBFS.
 
-Drop them into `app/assets/audio/` using the expected filenames listed in that README. Refresh the app (or reinstall the APK). The yellow placeholder banner disappears once real audio is loaded.
+Drop them into `app/assets/audio/` using the expected filenames listed in that README. Refresh the app (or reinstall the APK). Once real audio loads, the app uses your clips instead of the test tones.
 
 ---
 

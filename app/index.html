@@ -93,27 +93,6 @@
     align-items: center;
     justify-content: center;
   }
-  #placeholder-banner {
-    background: #2A2218;
-    color: var(--caution);
-    font-size: clamp(12px, 3.2vmin, 14px);
-    padding: 8px 14px;
-    margin: 0 12px 8px;
-    border-radius: 8px;
-    border: 1px solid #3A2E20;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  }
-  #placeholder-banner button {
-    background: transparent;
-    color: var(--caution);
-    border: 1px solid var(--caution);
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 11px;
-  }
   #file-protocol-banner {
     background: #18222A;
     color: var(--text);
@@ -353,11 +332,6 @@
   <div id="status-row">
     <span id="status-dot"></span>
     <span id="status-text">ready</span>
-  </div>
-
-  <div id="placeholder-banner" hidden>
-    <span>Placeholder tones loaded. Replace with real merganser audio before use with a duckling.</span>
-    <button id="banner-dismiss">ok</button>
   </div>
 
   <div id="file-protocol-banner" hidden>
@@ -618,6 +592,16 @@ const audioBuffers = { heart: [], fisharrows: [], alert: [] };
 let usingPlaceholders = false;
 let audioCtx = null;
 
+/* At most this many overlapping plays of the same category (same button). */
+const MAX_LAYERS_SAME_CAT = 2;
+const activePlaybackByCat = Object.fromEntries(CATEGORIES.map(c => [c, 0]));
+function releasePlaybackSlot(cat) {
+  activePlaybackByCat[cat] = Math.max(0, activePlaybackByCat[cat] - 1);
+}
+function canStartLayeredSound(cat) {
+  return activePlaybackByCat[cat] < MAX_LAYERS_SAME_CAT;
+}
+
 async function tryLoadOneBase(cat, base) {
   for (const ext of AUDIO_EXTS) {
     try {
@@ -643,10 +627,7 @@ async function tryLoadAudioFiles() {
       if (ok) anyLoaded = true;
     }
   }
-  if (!anyLoaded) {
-    usingPlaceholders = true;
-    document.getElementById("placeholder-banner").hidden = false;
-  }
+  if (!anyLoaded) usingPlaceholders = true;
 }
 
 function ensureCtx() {
@@ -664,14 +645,21 @@ function pickVariantIndex(cat, count) {
 
 function playRealClip(cat) {
   const pool = audioBuffers[cat];
-  if (!pool.length) return playPlaceholder(cat);
+  if (!pool.length) return void playPlaceholder(cat);
+  if (!canStartLayeredSound(cat)) return;
+  activePlaybackByCat[cat]++;
   const idx = pickVariantIndex(cat, pool.length);
   const src = audioCtx.createBufferSource();
   src.buffer = pool[idx];
   const gain = audioCtx.createGain();
   gain.gain.value = state.outputGain;
+  src.onended = () => releasePlaybackSlot(cat);
   src.connect(gain).connect(audioCtx.destination);
-  src.start(0);
+  try {
+    src.start(0);
+  } catch (e) {
+    releasePlaybackSlot(cat);
+  }
 }
 
 /* Placeholder tones. Intentionally not bird-like. Soft sines. */
@@ -681,8 +669,12 @@ const PLACEHOLDER_SPECS = {
   alert:      { freqs: [620],      dur: 0.35, env: "pulse" },
 };
 function playPlaceholder(cat) {
+  if (!canStartLayeredSound(cat)) return;
+  activePlaybackByCat[cat]++;
   ensureCtx();
   const spec = PLACEHOLDER_SPECS[cat];
+  const releaseAfterMs = 50 + (spec.env === "pulse" ? 200 + spec.dur * 1000 : spec.dur * 1000);
+  setTimeout(() => releasePlaybackSlot(cat), releaseAfterMs);
   const now = audioCtx.currentTime;
   const masterGain = audioCtx.createGain();
   masterGain.gain.value = state.outputGain * 0.25; // extra-quiet for placeholders
@@ -725,7 +717,6 @@ const els = {
   statusDot: document.getElementById("status-dot"),
   statusText: document.getElementById("status-text"),
   toast: document.getElementById("toast"),
-  bannerDismiss: document.getElementById("banner-dismiss"),
   fileProtocolBanner: document.getElementById("file-protocol-banner"),
   fileBannerDismiss: document.getElementById("file-banner-dismiss"),
 };
@@ -784,6 +775,12 @@ function tryPlay(cat, opts) {
   if (!decision.allowed) {
     setStatus(decision.reason, "denied");
     toast(decision.reason);
+    setTimeout(() => refreshStatus(), 1800);
+    return;
+  }
+  if (!canStartLayeredSound(cat)) {
+    setStatus("Too many playing", "denied");
+    toast("Let a call finish — only two at once per button.");
     setTimeout(() => refreshStatus(), 1800);
     return;
   }
@@ -890,9 +887,6 @@ els.ackBtn.addEventListener("click", () => {
   saveState();
   els.info.hidden = true;
   refreshStatus();
-});
-els.bannerDismiss.addEventListener("click", () => {
-  document.getElementById("placeholder-banner").hidden = true;
 });
 els.fileBannerDismiss.addEventListener("click", () => {
   els.fileProtocolBanner.hidden = true;
