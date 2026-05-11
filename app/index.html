@@ -695,7 +695,7 @@ function playRealClip(cat) {
   const buf = pool[idx];
   const src = audioCtx.createBufferSource();
   src.buffer = buf;
-  const loop = cat === "fisharrows" && state.foragingLoop;
+  const loop = cat === "fisharrows" && state.foragingLoop && buf.duration > 0.05;
   if (loop) {
     src.loop = true;
     src.loopStart = 0;
