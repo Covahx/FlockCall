@@ -103,17 +103,17 @@
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-rows: 1fr;
-    align-items: center;
+    align-items: stretch;
     gap: clamp(8px, 2.4vw, 14px);
     padding: clamp(8px, 2.2vw, 16px) clamp(6px, 1.8vw, 14px);
     min-height: 0;
   }
   main#grid > .call,
   main#grid > .foraging-stack {
-    align-self: center;
+    align-self: stretch;
     width: 100%;
-    height: auto;
     min-height: 0;
+    height: 100%;
   }
 
   .foraging-stack {
@@ -121,20 +121,21 @@
     flex-direction: column;
     min-width: 0;
     min-height: 0;
-    height: auto;
+    height: 100%;
   }
   .foraging-card {
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     min-height: var(--pad-min-h);
-    height: auto;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     background: var(--surface);
     color: var(--text);
-    border: 1px solid #2A343C;
+    border: 1px solid var(--calm);
     border-radius: clamp(12px, 3.2vw, 18px);
-    overflow: hidden;
+    /* overflow:hidden clipped the scaled foraging SVG — looked tiny / broken */
+    overflow: visible;
   }
   .foraging-main.call {
     flex: 1 1 0;
@@ -148,6 +149,7 @@
     align-items: center;
     gap: clamp(5px, 1.5vmin, 10px);
     padding: clamp(10px, 3vmin, 18px) clamp(6px, 1.5vw, 10px) clamp(4px, 1vmin, 8px);
+    overflow: visible;
   }
   .foraging-repeat-row {
     display: flex;
@@ -192,7 +194,7 @@
     border-radius: clamp(12px, 3.2vw, 18px);
     padding: clamp(10px, 3vmin, 18px) clamp(6px, 1.5vw, 10px);
     min-height: var(--pad-min-h);
-    height: auto;
+    height: 100%;
     min-width: 0;
     display: flex;
     flex-direction: column;
