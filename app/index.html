@@ -24,8 +24,11 @@
     /* Foraging repeat block height — extra bottom padding on Warning/Calm keeps icons aligned */
     --pad-min-h: clamp(124px, 28svmin, 220px);
     --foraging-repeat-stack: 56px;
-    /* One size for all pad icons; wide foraging SVG is scaled up slightly so it matches visually */
     --icon-box: clamp(80px, 26vmin, 118px);
+    /* Shared vertical rhythm: icons + labels line up across the three columns */
+    --pad-stack-gap: clamp(6px, 1.8vmin, 12px);
+    --pad-inset-x: clamp(6px, 1.5vw, 10px);
+    --pad-inset-y: clamp(10px, 3vmin, 18px);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html {
@@ -144,10 +147,10 @@
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    gap: clamp(5px, 1.5vmin, 10px);
-    padding: clamp(10px, 3vmin, 18px) clamp(6px, 1.5vw, 10px) clamp(4px, 1vmin, 8px);
+    gap: var(--pad-stack-gap);
+    padding: var(--pad-inset-y) var(--pad-inset-x) 6px;
     overflow: hidden;
   }
   /* Keeps stacked foraging art inside the pad (no bleed past rounded rect) */
@@ -201,15 +204,15 @@
     color: var(--text);
     border: 1px solid #2A343C;
     border-radius: clamp(12px, 3.2vw, 18px);
-    padding: clamp(10px, 3vmin, 18px) clamp(6px, 1.5vw, 10px);
+    padding: var(--pad-inset-y) var(--pad-inset-x);
     min-height: var(--pad-min-h);
     height: 100%;
     min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: clamp(6px, 1.8vmin, 12px);
+    justify-content: flex-start;
+    gap: var(--pad-stack-gap);
     cursor: pointer;
     transition: background 120ms, transform 120ms, opacity 120ms;
     touch-action: manipulation;
@@ -222,7 +225,7 @@
   /* After .call padding shorthand: extra bottom space mirrors foraging repeat strip so icons align */
   main#grid > .call.alert,
   main#grid > .call[data-cat="heart"] {
-    padding-bottom: calc(clamp(10px, 3vmin, 18px) + var(--foraging-repeat-stack));
+    padding-bottom: calc(var(--pad-inset-y) + var(--foraging-repeat-stack));
   }
 
   .call .icon {
@@ -250,6 +253,9 @@
     text-align: center;
     max-width: 100%;
     padding: 0 2px;
+    min-height: 2.5em;
+    display: block;
+    box-sizing: border-box;
   }
   .call.alert .label { color: var(--caution); }
   .call .sub {
@@ -258,11 +264,13 @@
     text-transform: none;
     letter-spacing: 0.02em;
     line-height: 1.35;
-    min-height: 1.35em;
+    min-height: calc(1.35em * 2);
     text-align: center;
     max-width: 100%;
     padding: 0 4px;
     word-break: break-word;
+    display: block;
+    box-sizing: border-box;
   }
   .call[disabled] {
     opacity: 0.4;
@@ -373,14 +381,21 @@
       --pad-min-h: clamp(150px, 42svmin, 280px);
       --foraging-repeat-stack: 64px;
       --icon-box: clamp(92px, 31vmin, 132px);
+      --pad-stack-gap: clamp(7px, 2vmin, 14px);
+      --pad-inset-x: clamp(6px, 1.5vw, 10px);
+      --pad-inset-y: clamp(14px, 3.8vmin, 22px);
     }
     .call {
-      padding: clamp(14px, 3.8vmin, 22px) clamp(6px, 1.5vw, 10px);
-      gap: clamp(7px, 2vmin, 14px);
+      padding: var(--pad-inset-y) var(--pad-inset-x);
+      gap: var(--pad-stack-gap);
+    }
+    .foraging-main.call {
+      padding: var(--pad-inset-y) var(--pad-inset-x) 6px;
+      gap: var(--pad-stack-gap);
     }
     main#grid > .call.alert,
     main#grid > .call[data-cat="heart"] {
-      padding-bottom: calc(clamp(14px, 3.8vmin, 22px) + var(--foraging-repeat-stack));
+      padding-bottom: calc(var(--pad-inset-y) + var(--foraging-repeat-stack));
     }
     .call .label { font-size: clamp(18px, 5.3vmin, 26px); }
     .call .sub { font-size: clamp(13px, 3.7vmin, 17px); }
@@ -394,18 +409,24 @@
       --pad-min-h: clamp(96px, 22svmin, 168px);
       --foraging-repeat-stack: 42px;
       --icon-box: clamp(56px, 18vmin, 84px);
+      --pad-stack-gap: 4px;
+      --pad-inset-y: clamp(6px, 1.8vmin, 12px);
+      --pad-inset-x: clamp(6px, 1.5vw, 10px);
     }
     .foraging-repeat-row { padding: 0 6px 6px; }
     .foraging-loop-cb { width: 20px; height: 20px; }
     .call {
       min-height: 0;
-      padding-top: clamp(6px, 1.8vmin, 12px);
-      padding-bottom: clamp(6px, 1.8vmin, 12px);
-      gap: 4px;
+      padding: var(--pad-inset-y) var(--pad-inset-x);
+      gap: var(--pad-stack-gap);
+    }
+    .foraging-main.call {
+      padding: var(--pad-inset-y) var(--pad-inset-x) 4px;
+      gap: var(--pad-stack-gap);
     }
     main#grid > .call.alert,
     main#grid > .call[data-cat="heart"] {
-      padding-bottom: calc(clamp(6px, 1.8vmin, 12px) + var(--foraging-repeat-stack));
+      padding-bottom: calc(var(--pad-inset-y) + var(--foraging-repeat-stack));
     }
     .call .label { font-size: clamp(14px, 4vmin, 19px); }
     .call .sub { font-size: clamp(11px, 3vmin, 14px); }
@@ -454,7 +475,7 @@
             <path d="M 48 8 L 34 24 L 48 34"/>
             <line x1="12" y1="46" x2="52" y2="46" stroke-opacity="0.35"/>
             <!-- Fish: original paths from the wide icon (pre–stacked redesign), centered under arrows -->
-            <g transform="translate(32, 76) scale(1.12) translate(-17, -28)">
+            <g transform="translate(32, 74) scale(1.32) translate(-17, -28)">
               <path d="M6 28 C 10 18, 18 16, 28 28 C 18 40, 10 38, 6 28 Z"/>
               <path d="M28 28 L 38 22 L 34 28 L 38 34 Z"/>
               <circle cx="12" cy="26" r="1.8" fill="currentColor"/>
